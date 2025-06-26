@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Trader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .galaxy-bg {
+            background: linear-gradient(to bottom, #000428, #000000);
+        }
+        .planet-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+        }
+        .planet-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 191, 255, 0.8);
+        }
+        .ship-display {
+            position: relative;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00bfff;
+            border-radius: 8px;
+        }
+        .progress-bar {
+            height: 4px;
+            background: linear-gradient(to right, #00bfff, #0066ff);
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body class="galaxy-bg text-white min-h-screen font-mono">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-blue-500 pb-4">
+            <div class="flex items-center mb-4 md:mb-0">
+                <i class="fas fa-rocket text-3xl text-blue-400 mr-3"></i>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                    GALACTIC TRADER
+                </h1>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 text-sm">
+                <div class="bg-gray-800 px-4 py-2 rounded-lg flex items-center">
+                    <i class="fas fa-coins text-yellow-400 mr-2"></i>
+                    <span id="credits">10,000</span> CR
+                </div>
+                <div class="bg-gray-800 px-4 py-2 rounded-lg flex items-center">
+                    <i class="fas fa-boxes text-blue-300 mr-2"></i>
+                    <span id="cargo">0</span>/<span id="max-cargo">50</span> T
+                </div>
+                <div class="bg-gray-800 px-4 py-2 rounded-lg flex items-center">
+                    <i class="fas fa-map-marker-alt text-red-400 mr-2"></i>
+                    <span id="current-location">Earth</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Game Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Panel - Ship and Travel -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Ship Display -->
+                <div class="ship-display p-4">
+                    <h2 class="text-xl font-bold mb-4 border-b border-blue-500 pb-2 flex items-center">
+                        <i class="fas fa-space-shuttle mr-2"></i> STARHAWK
+                    </h2>
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Fuel</span>
+                            <span id="fuel">100</span>/100 LY
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div id="fuel-bar" class="progress-bar rounded-full h-2" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Hull</span>
+                            <span id="hull">100</span>/100%
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div id="hull-bar" class="progress-bar rounded-full h-2" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="bg-gray-800 p-2 rounded">
+                            <div class="text-gray-400">Speed</div>
+                            <div>5 LY/h</div>
+                        </div>
+                        <div class="bg-gray-800 p-2 rounded">
+                            <div class="text-gray-400">Cargo</div>
+                            <div>50 T</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Travel Panel -->
+                <div class="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-blue-500">
+                    <h2 class="text-xl font-bold mb-4 border-b border-blue-500 pb-2 flex items-center">
+                        <i class="fas fa-map mr-2"></i> NAVIGATION
+                    </h2>
+                    <div class="space-y-3" id="planet-list">
+                        <!-- Planets will be added here by JavaScript -->
+                    </div>
+                    <div class="mt-4 p-3 bg-blue-900 bg-opacity-30 rounded border border-blue-500 text-sm">
+                        <div class="flex justify-between mb-1">
+                            <span>Distance:</span>
+                            <span id="travel-distance">0</span> LY
+                        </div>
+                        <div class="flex justify-between mb-1">
+                            <span>Fuel Cost:</span>
+                            <span id="travel-fuel">0</span> LY
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Travel Time:</span>
+                            <span id="travel-time">0</span> h
+                        </div>
+                    </div>
+                    <button id="travel-button" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 py-2 rounded-lg font-bold flex items-center justify-center disabled:opacity-50" disabled>
+                        <i class="fas fa-rocket mr-2"></i> ENGAGE DRIVE
+                    </button>
+                </div>
+            </div>
+
+            <!-- Center Panel - Market -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Market Display -->
+                <div class="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-blue-500">
+                    <h2 class="text-xl font-bold mb-4 border-b border-blue-500 pb-2 flex items-center">
+                        <i class="fas fa-shopping-cart mr-2"></i> LOCAL MARKET
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left border-b border-blue-500">
+                                    <th class="pb-2">Commodity</th>
+                                    <th class="pb-2">Price</th>
+                                    <th class="pb-2">Stock</th>
+                                    <th class="pb-2">Demand</th>
+                                    <th class="pb-2">You Have</th>
+                                    <th class="pb-2">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="market-items">
+                                <!-- Market items will be added here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Inventory -->
+                <div class="bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-blue-500">
+                    <h2 class="text-xl font-bold mb-4 border-b border-blue-500 pb-2 flex items-center">
+                        <i class="fas fa-box-open mr-2"></i> CARGO HOLD
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left border-b border-blue-500">
+                                    <th class="pb-2">Commodity</th>
+                                    <th class="pb-2">Qty</th>
+                                    <th class="pb-2">Buy Price</th>
+                                    <th class="pb-2">Current Value</th>
+                                    <th class="pb-2">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-items">
+                                <!-- Inventory items will be added here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="mt-8 bg-gray-900 bg-opacity-70 p-4 rounded-lg border border-blue-500 max-h-48 overflow-y-auto">
+            <h2 class="text-xl font-bold mb-2 border-b border-blue-500 pb-2 flex items-center">
+                <i class="fas fa-scroll mr-2"></i> SHIP'S LOG
+            </h2>
+            <div id="event-log" class="text-sm space-y-1">
+                <div class="text-blue-400">Welcome to Galactic Trader, Captain!</div>
+                <div class="text-gray-400">Your journey begins on Earth. Buy low, sell high, and explore the galaxy!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const gameState = {
+            credits: 10000,
+            currentPlanet: 'Earth',
+            fuel: 100,
+            hull: 100,
+            cargoUsed: 0,
+            maxCargo: 50,
+            inventory: {},
+            selectedDestination: null,
+            inTransit: false,
+            travelTimeLeft: 0,
+            travelInterval: null,
+            
+            planets: {
+                'Earth': {
+                    distance: 0,
+                    market: {
+                        'Food': { price: 100, stock: 500, demand: 'High' },
+                        'Water': { price: 50, stock: 800, demand: 'Medium' },
+                        'Ore': { price: 300, stock: 200, demand: 'Low' }
+                    }
+                },
+                'Mars': {
+                    distance: 1.5,
+                    market: {
+                        'Food': { price: 200, stock: 300, demand: 'High' },
+                        'Water': { price: 100, stock: 400, demand: 'High' },
+                        'Minerals': { price: 400, stock: 150, demand: 'Medium' }
+                    }
+                },
+                'Alpha Centauri': {
+                    distance: 4.3,
+                    market: {
+                        'Food': { price: 500, stock: 100, demand: 'High' },
+                        'Technology': { price: 1500, stock: 50, demand: 'Medium' },
+                        'Luxury Goods': { price: 2000, stock: 30, demand: 'Low' }
+                    }
+                },
+                'Titan': {
+                    distance: 8.7,
+                    market: {
+                        'Water': { price: 80, stock: 600, demand: 'Medium' },
+                        'Minerals': { price: 350, stock: 300, demand: 'High' },
+                        'Fuel': { price: 250, stock: 400, demand: 'High' }
+                    }
+                },
+                'Andromeda Station': {
+                    distance: 12.2,
+                    market: {
+                        'Technology': { price: 1200, stock: 80, demand: 'Medium' },
+                        'Luxury Goods': { price: 2500, stock: 20, demand: 'High' },
+                        'Exotic Matter': { price: 5000, stock: 10, demand: 'Low' }
+                    }
+                }
+            },
+            
+            commodities: {
+                'Food': { weight: 1 },
+                'Water': { weight: 1 },
+                'Ore': { weight: 2 },
+                'Minerals': { weight: 2 },
+                'Technology': { weight: 1 },
+                'Luxury Goods': { weight: 0.5 },
+                'Fuel': { weight: 1 },
+                'Exotic Matter': { weight: 0.2 }
+            }
+        };
+
+        // DOM Elements
+        const elements = {
+            credits: document.getElementById('credits'),
+            cargo: document.getElementById('cargo'),
+            maxCargo: document.getElementById('max-cargo'),
+            currentLocation: document.getElementById('current-location'),
+            fuel: document.getElementById('fuel'),
+            fuelBar: document.getElementById('fuel-bar'),
+            hull: document.getElementById('hull'),
+            hullBar: document.getElementById('hull-bar'),
+            planetList: document.getElementById('planet-list'),
+            travelDistance: document.getElementById('travel-distance'),
+            travelFuel: document.getElementById('travel-fuel'),
+            travelTime: document.getElementById('travel-time'),
+            travelButton: document.getElementById('travel-button'),
+            marketItems: document.getElementById('market-items'),
+            inventoryItems: document.getElementById('inventory-items'),
+            eventLog: document.getElementById('event-log')
+        };
+
+        // Initialize the game
+        function initGame() {
+            updateUI();
+            renderPlanets();
+            renderMarket();
+            renderInventory();
+        }
+
+        // Update all UI elements
+        function updateUI() {
+            elements.credits.textContent = gameState.credits.toLocaleString();
+            elements.cargo.textContent = gameState.cargoUsed;
+            elements.maxCargo.textContent = gameState.maxCargo;
+            elements.currentLocation.textContent = gameState.currentPlanet;
+            elements.fuel.textContent = gameState.fuel;
+            elements.fuelBar.style.width = `${gameState.fuel}%`;
+            elements.hull.textContent = gameState.hull;
+            elements.hullBar.style.width = `${gameState.hull}%`;
+            
+            // Update fuel bar color based on level
+            if (gameState.fuel < 20) {
+                elements.fuelBar.style.background = 'linear-gradient(to right, #ff0000, #990000)';
+            } else {
+                elements.fuelBar.style.background = 'linear-gradient(to right, #00bfff, #0066ff)';
+            }
+        }
+
+        // Render planet list for travel
+        function renderPlanets() {
+            elements.planetList.innerHTML = '';
+            
+            for (const planet in gameState.planets) {
+                if (planet === gameState.currentPlanet) continue;
+                
+                const planetData = gameState.planets[planet];
+                const distance = planetData.distance;
+                const fuelCost = distance * 5; // 5 fuel per LY
+                
+                const planetElement = document.createElement('div');
+                planetElement.className = `flex justify-between items-center p-2 rounded-lg cursor-pointer hover:bg-blue-900 hover:bg-opacity-30 ${gameState.selectedDestination === planet ? 'bg-blue-900 bg-opacity-50 border border-blue-500' : 'bg-gray-800'}`;
+                planetElement.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-globe-americas text-blue-300 mr-2"></i>
+                        <span class="font-medium">${planet}</span>
+                    </div>
+                    <div class="text-sm text-gray-400">${distance} LY</div>
+                `;
+                
+                planetElement.addEventListener('click', () => {
+                    selectDestination(planet);
+                });
+                
+                elements.planetList.appendChild(planetElement);
+            }
+        }
+
+        // Select a destination for travel
+        function selectDestination(planet) {
+            if (gameState.inTransit) return;
+            
+            gameState.selectedDestination = planet;
+            const planetData = gameState.planets[planet];
+            const distance = planetData.distance;
+            const fuelCost = distance * 5;
+            const travelTime = distance / 5 * 60; // in minutes
+            
+            elements.travelDistance.textContent = distance;
+            elements.travelFuel.textContent = fuelCost;
+            elements.travelTime.textContent = (travelTime / 60).toFixed(1);
+            
+            // Enable/disable travel button based on fuel
+            elements.travelButton.disabled = fuelCost > gameState.fuel;
+            
+            // Highlight selected planet
+            renderPlanets();
+        }
+
+        // Start travel to destination
+        function startTravel() {
+            if (!gameState.selectedDestination || gameState.inTransit) return;
+            
+            const destination = gameState.selectedDestination;
+            const planetData = gameState.planets[destination];
+            const distance = planetData.distance;
+            const fuelCost = distance * 5;
+            const travelTime = distance / 5 * 60; // in minutes
+            
+            if (fuelCost > gameState.fuel) {
+                addLogEntry("Insufficient fuel for this journey!", "red-400");
+                return;
+            }
+            
+            gameState.inTransit = true;
+            gameState.fuel -= fuelCost;
+            gameState.travelTimeLeft = travelTime;
+            
+            elements.travelButton.disabled = true;
+            elements.travelButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> TRAVELING...';
+            
+            addLogEntry(`Departing for ${destination}. Estimated arrival in ${(travelTime/60).toFixed(1)} hours.`, "blue-400");
+            
+            // Start travel timer
+            gameState.travelInterval = setInterval(updateTravel, 1000);
+        }
+
+        // Update travel progress
+        function updateTravel() {
+            gameState.travelTimeLeft--;
+            
+            if (gameState.travelTimeLeft <= 0) {
+                completeTravel();
+                return;
+            }
+            
+            // Update UI with remaining time
+            const hours = Math.floor(gameState.travelTimeLeft / 60);
+            const minutes = gameState.travelTimeLeft % 60;
+            elements.travelButton.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> TRAVELING (${hours}h ${minutes}m)`;
+        }
+
+        // Complete travel and arrive at destination
+        function completeTravel() {
+            clearInterval(gameState.travelInterval);
+            
+            const destination = gameState.selectedDestination;
+            gameState.currentPlanet = destination;
+            gameState.selectedDestination = null;
+            gameState.inTransit = false;
+            
+            // Small chance of hull damage during travel (5%)
+            if (Math.random() < 0.05) {
+                const damage = Math.floor(Math.random() * 10) + 1;
+                gameState.hull = Math.max(0, gameState.hull - damage);
+                addLogEntry(`Your ship sustained ${damage}% hull damage during the journey!`, "red-400");
+            }
+            
+            // Update UI
+            elements.travelButton.disabled = false;
+            elements.travelButton.innerHTML = '<i class="fas fa-rocket mr-2"></i> ENGAGE DRIVE';
+            
+            addLogEntry(`Arrived at ${destination}!`, "green-400");
+            
+            // Update market and UI
+            updateUI();
+            renderPlanets();
+            renderMarket();
+        }
+
+        // Render market items
+        function renderMarket() {
+            elements.marketItems.innerHTML = '';
+            
+            const planetMarket = gameState.planets[gameState.currentPlanet].market;
+            
+            for (const commodity in planetMarket) {
+                const item = planetMarket[commodity];
+                const weight = gameState.commodities[commodity].weight;
+                const inInventory = gameState.inventory[commodity] || 0;
+                
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-700 hover:bg-gray-800';
+                row.innerHTML = `
+                    <td class="py-3">${commodity}</td>
+                    <td class="py-3">${item.price.toLocaleString()} CR</td>
+                    <td class="py-3">${item.stock.toLocaleString()} T</td>
+                    <td class="py-3">
+                        <span class="px-2 py-1 rounded text-xs ${
+                            item.demand === 'High' ? 'bg-green-900 text-green-300' : 
+                            item.demand === 'Medium' ? 'bg-yellow-900 text-yellow-300' : 'bg-red-900 text-red-300'
+                        }">
+                            ${item.demand}
+                        </span>
+                    </td>
+                    <td class="py-3">${inInventory}</td>
+                    <td class="py-3">
+                        <div class="flex space-x-2">
+                            <button class="buy-btn px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs" data-commodity="${commodity}" data-action="buy1">
+                                Buy 1
+                            </button>
+                            <button class="buy-btn px-2 py-1 bg-blue-700 hover:bg-blue-800 rounded text-xs" data-commodity="${commodity}" data-action="buy5">
+                                Buy 5
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                elements.marketItems.appendChild(row);
+            }
+            
+            // Add event listeners to buy buttons
+            document.querySelectorAll('.buy-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const commodity = this.getAttribute('data-commodity');
+                    const action = this.getAttribute('data-action');
+                    const quantity = action === 'buy1' ? 1 : 5;
+                    buyCommodity(commodity, quantity);
+                });
+            });
+        }
+
+        // Buy a commodity
+        function buyCommodity(commodity, quantity) {
+            const planetMarket = gameState.planets[gameState.currentPlanet].market;
+            const item = planetMarket[commodity];
+            const weight = gameState.commodities[commodity].weight;
+            
+            // Check if available in market
+            if (!item || item.stock < quantity) {
+                addLogEntry(`Not enough ${commodity} available in the market!`, "red-400");
+                return;
+            }
+            
+            const totalCost = item.price * quantity;
+            const totalWeight = weight * quantity;
+            
+            // Check if player has enough credits
+            if (gameState.credits < totalCost) {
+                addLogEntry(`Insufficient credits to buy ${quantity} units of ${commodity}!`, "red-400");
+                return;
+            }
+            
+            // Check if player has enough cargo space
+            if (gameState.cargoUsed + totalWeight > gameState.maxCargo) {
+                addLogEntry(`Not enough cargo space for ${quantity} units of ${commodity}!`, "red-400");
+                return;
+            }
+            
+            // Execute transaction
+            gameState.credits -= totalCost;
+            item.stock -= quantity;
+            
+            // Add to inventory
+            if (!gameState.inventory[commodity]) {
+                gameState.inventory[commodity] = 0;
+            }
+            gameState.inventory[commodity] += quantity;
+            gameState.cargoUsed += totalWeight;
+            
+            addLogEntry(`Purchased ${quantity} units of ${commodity} for ${totalCost.toLocaleString()} CR.`, "green-400");
+            
+            // Update UI
+            updateUI();
+            renderMarket();
+            renderInventory();
+        }
+
+        // Render inventory items
+        function renderInventory() {
+            elements.inventoryItems.innerHTML = '';
+            
+            for (const commodity in gameState.inventory) {
+                const quantity = gameState.inventory[commodity];
+                if (quantity <= 0) continue;
+                
+                const weight = gameState.commodities[commodity].weight;
+                const planetMarket = gameState.planets[gameState.currentPlanet].market;
+                const currentPrice = planetMarket[commodity] ? planetMarket[commodity].price : 0;
+                
+                // Calculate average buy price (simplified)
+                const buyPrice = currentPrice * 0.8; // Assume bought at 80% of current price
+                const totalValue = currentPrice * quantity;
+                
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-700 hover:bg-gray-800';
+                row.innerHTML = `
+                    <td class="py-3">${commodity}</td>
+                    <td class="py-3">${quantity.toLocaleString()} T</td>
+                    <td class="py-3">${Math.floor(buyPrice).toLocaleString()} CR</td>
+                    <td class="py-3">${totalValue.toLocaleString()} CR</td>
+                    <td class="py-3">
+                        <div class="flex space-x-2">
+                            <button class="sell-btn px-2 py-1 bg-purple-600 hover:bg-purple-700 rounded text-xs" data-commodity="${commodity}" data-action="sell1">
+                                Sell 1
+                            </button>
+                            <button class="sell-btn px-2 py-1 bg-purple-700 hover:bg-purple-800 rounded text-xs" data-commodity="${commodity}" data-action="sell5">
+                                Sell 5
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                elements.inventoryItems.appendChild(row);
+            }
+            
+            // Add event listeners to sell buttons
+            document.querySelectorAll('.sell-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const commodity = this.getAttribute('data-commodity');
+                    const action = this.getAttribute('data-action');
+                    const quantity = action === 'sell1' ? 1 : 5;
+                    sellCommodity(commodity, quantity);
+                });
+            });
+        }
+
+        // Sell a commodity
+        function sellCommodity(commodity, quantity) {
+            // Check if player has this commodity
+            if (!gameState.inventory[commodity] || gameState.inventory[commodity] < quantity) {
+                addLogEntry(`You don't have ${quantity} units of ${commodity} to sell!`, "red-400");
+                return;
+            }
+            
+            const planetMarket = gameState.planets[gameState.currentPlanet].market;
+            const weight = gameState.commodities[commodity].weight;
+            
+            // Check if commodity is sold in this market
+            if (!planetMarket[commodity]) {
+                addLogEntry(`Nobody wants to buy ${commodity} on this planet!`, "red-400");
+                return;
+            }
+            
+            const sellPrice = planetMarket[commodity].price;
+            const totalValue = sellPrice * quantity;
+            const totalWeight = weight * quantity;
+            
+            // Execute transaction
+            gameState.credits += totalValue;
+            planetMarket[commodity].stock += quantity;
+            gameState.inventory[commodity] -= quantity;
+            gameState.cargoUsed -= totalWeight;
+            
+            // Remove from inventory if quantity reaches 0
+            if (gameState.inventory[commodity] <= 0) {
+                delete gameState.inventory[commodity];
+            }
+            
+            addLogEntry(`Sold ${quantity} units of ${commodity} for ${totalValue.toLocaleString()} CR.`, "green-400");
+            
+            // Update UI
+            updateUI();
+            renderMarket();
+            renderInventory();
+        }
+
+        // Add entry to event log
+        function addLogEntry(message, colorClass = "white") {
+            const entry = document.createElement('div');
+            entry.className = `text-${colorClass}`;
+            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            elements.eventLog.prepend(entry);
+            
+            // Limit log entries to 50
+            if (elements.eventLog.children.length > 50) {
+                elements.eventLog.removeChild(elements.eventLog.lastChild);
+            }
+        }
+
+        // Event Listeners
+        elements.travelButton.addEventListener('click', startTravel);
+
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>
