@@ -101,6 +101,14 @@
                             <div>50 T</div>
                         </div>
                     </div>
+                    <div class="mt-4 grid grid-cols-2 gap-2">
+                        <button id="travel-button" class="bg-blue-600 hover:bg-blue-700 py-2 rounded-lg font-bold flex items-center justify-center disabled:opacity-50" disabled>
+                            <i class="fas fa-rocket mr-2"></i> ENGAGE DRIVE
+                        </button>
+                        <button id="refuel-button" class="bg-green-600 hover:bg-green-700 py-2 rounded-lg font-bold flex items-center justify-center disabled:opacity-50">
+                            <i class="fas fa-gas-pump mr-2"></i> REFUEL
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Travel Panel -->
@@ -125,9 +133,6 @@
                             <span id="travel-time">0</span> h
                         </div>
                     </div>
-                    <button id="travel-button" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 py-2 rounded-lg font-bold flex items-center justify-center disabled:opacity-50" disabled>
-                        <i class="fas fa-rocket mr-2"></i> ENGAGE DRIVE
-                    </button>
                 </div>
             </div>
 
@@ -632,8 +637,28 @@
             }
         }
 
+        // Refuel ship
+        function refuelShip() {
+            const fuelCost = (100 - gameState.fuel) * 10; // 10 CR per unit of fuel
+            if (fuelCost <= 0) {
+                addLogEntry("Fuel tank is already full!", "yellow-400");
+                return;
+            }
+            
+            if (gameState.credits < fuelCost) {
+                addLogEntry(`Not enough credits to refuel! Need ${fuelCost} CR.`, "red-400");
+                return;
+            }
+            
+            gameState.credits -= fuelCost;
+            gameState.fuel = 100;
+            addLogEntry(`Ship refueled for ${fuelCost} CR.`, "green-400");
+            updateUI();
+        }
+
         // Event Listeners
         elements.travelButton.addEventListener('click', startTravel);
+        document.getElementById('refuel-button').addEventListener('click', refuelShip);
 
         // Initialize the game
         initGame();
