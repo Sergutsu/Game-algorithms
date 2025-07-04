@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Operations Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        vectorBlue: '#3b82f6',
+                        vectorGreen: '#10b981',
+                        vectorRed: '#ef4444',
+                        vectorPurple: '#8b5cf6',
+                        vectorYellow: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .vector-canvas {
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .vector-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .vector-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .vector-card.addition { border-left-color: #3b82f6; }
+        .vector-card.subtraction { border-left-color: #10b981; }
+        .vector-card.scalar { border-left-color: #ef4444; }
+        .vector-card.normalization { border-left-color: #8b5cf6; }
+        .vector-card.magnitude { border-left-color: #f59e0b; }
+        .vector-card.dot { border-left-color: #ec4899; }
+        .vector-card.cross { border-left-color: #14b8a6; }
+        .vector-card.projection { border-left-color: #f97316; }
+        .vector-card.reflection { border-left-color: #6366f1; }
+        
+        .vector-a { stroke: #3b82f6; }
+        .vector-b { stroke: #10b981; }
+        .vector-result { stroke: #ef4444; }
+        .vector-projection { stroke: #8b5cf6; }
+        .vector-reflection { stroke: #f59e0b; }
+        
+        .arrowhead { fill: currentColor; }
+        
+        .operation-active {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Vector Operations Visualizer</h1>
+            <p class="text-xl max-w-3xl mx-auto mb-8">Interactive visualization of 12 fundamental vector operations in 2D space</p>
+            <div class="flex justify-center space-x-4">
+                <a href="#operations" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition">Explore Operations</a>
+                <a href="#visualizer" class="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition">Try Interactive Demo</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Introduction -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Understanding Vector Operations</h2>
+                <p class="text-gray-600 text-lg">
+                    Vectors are fundamental mathematical objects used in physics, computer graphics, and machine learning. 
+                    This interactive guide helps you visualize and understand the 12 basic vector operations through 
+                    dynamic demonstrations and intuitive explanations.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-blue-50 p-6 rounded-lg border border-blue-100">
+                    <div class="text-blue-600 text-3xl mb-4">
+                        <i class="fas fa-arrows-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Vector Basics</h3>
+                    <p class="text-gray-600">
+                        Vectors represent magnitude and direction. In 2D space, they're defined by their x and y components.
+                    </p>
+                </div>
+                
+                <div class="bg-green-50 p-6 rounded-lg border border-green-100">
+                    <div class="text-green-600 text-3xl mb-4">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Operations Explained</h3>
+                    <p class="text-gray-600">
+                        From basic addition to complex projections, each operation has specific mathematical properties and applications.
+                    </p>
+                </div>
+                
+                <div class="bg-purple-50 p-6 rounded-lg border border-purple-100">
+                    <div class="text-purple-600 text-3xl mb-4">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Visual Learning</h3>
+                    <p class="text-gray-600">
+                        Interactive visualizations help build intuition that equations alone can't provide.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Operations Grid -->
+    <section id="operations" class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">12 Fundamental Vector Operations</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Addition -->
+                <div class="vector-card addition bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Vector Addition</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Combining two vectors to form a resultant vector.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">A + B = (A<sub>x</sub>+B<sub>x</sub>, A<sub>y</sub>+B<sub>y</sub>)</div>
+                </div>
+                
+                <!-- Subtraction -->
+                <div class="vector-card subtraction bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
+                            <i class="fas fa-minus"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Vector Subtraction</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Finding the difference between two vectors.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">A - B = (A<sub>x</sub>-B<sub>x</sub>, A<sub>y</sub>-B<sub>y</sub>)</div>
+                </div>
+                
+                <!-- Scalar Multiplication -->
+                <div class="vector-card scalar bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 mr-3">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Scalar Multiplication</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Scaling a vector by a real number.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">k · A = (k·A<sub>x</sub>, k·A<sub>y</sub>)</div>
+                </div>
+                
+                <!-- Scalar Division -->
+                <div class="vector-card scalar bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 mr-3">
+                            <i class="fas fa-divide"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Scalar Division</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Dividing a vector by a scalar value.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">A / k = (A<sub>x</sub>/k, A<sub>y</sub>/k)</div>
+                </div>
+                
+                <!-- Normalization -->
+                <div class="vector-card normalization bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-3">
+                            <i class="fas fa-arrows-alt-v"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Normalization</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Converting a vector to unit length while preserving direction.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">Â = A / ||A||</div>
+                </div>
+                
+                <!-- Magnitude -->
+                <div class="vector-card magnitude bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-3">
+                            <i class="fas fa-ruler"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Magnitude</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">The length or size of a vector.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">||A|| = √(A<sub>x</sub>² + A<sub>y</sub>²)</div>
+                </div>
+                
+                <!-- SqrMagnitude -->
+                <div class="vector-card magnitude bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-3">
+                            <i class="fas fa-square"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">SqrMagnitude</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Squared length of a vector (faster to compute).</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">||A||² = A<sub>x</sub>² + A<sub>y</sub>²</div>
+                </div>
+                
+                <!-- Dot Product -->
+                <div class="vector-card dot bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 mr-3">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Dot Product</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Measures the similarity of two vectors.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">A · B = A<sub>x</sub>B<sub>x</sub> + A<sub>y</sub>B<sub>y</sub></div>
+                </div>
+                
+                <!-- Cross Product -->
+                <div class="vector-card cross bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 mr-3">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Cross Product</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Measures the perpendicularity of two vectors.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">A × B = A<sub>x</sub>B<sub>y</sub> - A<sub>y</sub>B<sub>x</sub></div>
+                </div>
+                
+                <!-- Projection (A on B) -->
+                <div class="vector-card projection bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mr-3">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Projection (A on B)</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">The component of A that lies along B.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">proj<sub>B</sub>A = [(A·B) / ||B||²] B</div>
+                </div>
+                
+                <!-- Projection (B on A) -->
+                <div class="vector-card projection bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mr-3">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Projection (B on A)</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">The component of B that lies along A.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">proj<sub>A</sub>B = [(A·B) / ||A||²] A</div>
+                </div>
+                
+                <!-- Reflection -->
+                <div class="vector-card reflection bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-3">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Reflection</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Reflecting a vector over another vector.</p>
+                    <div class="text-sm font-mono bg-gray-100 p-2 rounded">ref<sub>B</sub>A = 2proj<sub>B</sub>A - A</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Visualizer -->
+    <section id="visualizer" class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8">Interactive Vector Visualizer</h2>
+            
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Canvas -->
+                <div class="lg:w-2/3">
+                    <div class="bg-gray-100 rounded-lg p-4 mb-4">
+                        <div class="vector-canvas bg-white rounded-lg shadow-inner w-full h-96 relative overflow-hidden">
+                            <svg id="vector-svg" class="w-full h-full"></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-blue-800 mb-2">Vector A</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-600">X:</span>
+                                <input type="range" min="-200" max="200" value="100" class="w-full vector-slider" data-vector="a" data-component="x">
+                                <span id="a-x-value" class="text-sm font-mono w-12">100</span>
+                            </div>
+                            <div class="flex items-center space-x-2 mt-2">
+                                <span class="text-sm text-gray-600">Y:</span>
+                                <input type="range" min="-200" max="200" value="50" class="w-full vector-slider" data-vector="a" data-component="y">
+                                <span id="a-y-value" class="text-sm font-mono w-12">50</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-green-800 mb-2">Vector B</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-600">X:</span>
+                                <input type="range" min="-200" max="200" value="50" class="w-full vector-slider" data-vector="b" data-component="x">
+                                <span id="b-x-value" class="text-sm font-mono w-12">50</span>
+                            </div>
+                            <div class="flex items-center space-x-2 mt-2">
+                                <span class="text-sm text-gray-600">Y:</span>
+                                <input type="range" min="-200" max="200" value="100" class="w-full vector-slider" data-vector="b" data-component="y">
+                                <span id="b-y-value" class="text-sm font-mono w-12">100</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-purple-800 mb-2">Scalar Value</h3>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-600">k:</span>
+                            <input type="range" min="0" max="5" step="0.1" value="1.5" class="w-full" id="scalar-slider">
+                            <span id="scalar-value" class="text-sm font-mono w-12">1.5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="lg:w-1/3">
+                    <div class="bg-gray-50 rounded-lg p-6 shadow-md">
+                        <h3 class="text-xl font-semibold mb-4">Select Operation</h3>
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-6">
+                            <button class="operation-btn bg-blue-100 text-blue-800 py-2 px-3 rounded-lg hover:bg-blue-200 transition" data-operation="addition">
+                                <i class="fas fa-plus mr-2"></i>Addition
+                            </button>
+                            <button class="operation-btn bg-green-100 text-green-800 py-2 px-3 rounded-lg hover:bg-green-200 transition" data-operation="subtraction">
+                                <i class="fas fa-minus mr-2"></i>Subtraction
+                            </button>
+                            <button class="operation-btn bg-red-100 text-red-800 py-2 px-3 rounded-lg hover:bg-red-200 transition" data-operation="scalar-mult">
+                                <i class="fas fa-times mr-2"></i>Scalar Mult
+                            </button>
+                            <button class="operation-btn bg-red-100 text-red-800 py-2 px-3 rounded-lg hover:bg-red-200 transition" data-operation="scalar-div">
+                                <i class="fas fa-divide mr-2"></i>Scalar Div
+                            </button>
+                            <button class="operation-btn bg-purple-100 text-purple-800 py-2 px-3 rounded-lg hover:bg-purple-200 transition" data-operation="normalization">
+                                <i class="fas fa-arrows-alt-v mr-2"></i>Normalization
+                            </button>
+                            <button class="operation-btn bg-yellow-100 text-yellow-800 py-2 px-3 rounded-lg hover:bg-yellow-200 transition" data-operation="magnitude">
+                                <i class="fas fa-ruler mr-2"></i>Magnitude
+                            </button>
+                            <button class="operation-btn bg-yellow-100 text-yellow-800 py-2 px-3 rounded-lg hover:bg-yellow-200 transition" data-operation="sqrMagnitude">
+                                <i class="fas fa-square mr-2"></i>SqrMagnitude
+                            </button>
+                            <button class="operation-btn bg-pink-100 text-pink-800 py-2 px-3 rounded-lg hover:bg-pink-200 transition" data-operation="dot">
+                                <i class="fas fa-circle mr-2"></i>Dot Product
+                            </button>
+                            <button class="operation-btn bg-teal-100 text-teal-800 py-2 px-3 rounded-lg hover:bg-teal-200 transition" data-operation="cross">
+                                <i class="fas fa-times mr-2"></i>Cross Product
+                            </button>
+                            <button class="operation-btn bg-orange-100 text-orange-800 py-2 px-3 rounded-lg hover:bg-orange-200 transition" data-operation="projection-a">
+                                <i class="fas fa-arrow-down mr-2"></i>Projection A→B
+                            </button>
+                            <button class="operation-btn bg-orange-100 text-orange-800 py-2 px-3 rounded-lg hover:bg-orange-200 transition" data-operation="projection-b">
+                                <i class="fas fa-arrow-up mr-2"></i>Projection B→A
+                            </button>
+                            <button class="operation-btn bg-indigo-100 text-indigo-800 py-2 px-3 rounded-lg hover:bg-indigo-200 transition" data-operation="reflection">
+                                <i class="fas fa-sync-alt mr-2"></i>Reflection
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-lg border border-gray-200">
+                            <h4 class="font-semibold mb-2">Operation Details</h4>
+                            <div id="operation-details" class="text-sm text-gray-700">
+                                Select an operation to see details and visualization
+                            </div>
+                            <div id="operation-result" class="mt-3 font-mono text-sm p-2 bg-gray-50 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-4">Vector Operations Visualizer - Interactive Learning Tool</p>
+            <div class="flex justify-center space-x-6">
+                <a href="#" class="hover:text-blue-300 transition"><i class="fab fa-github text-xl"></i></a>
+                <a href="#" class="hover:text-blue-300 transition"><i class="fab fa-twitter text-xl"></i></a>
+                <a href="#" class="hover:text-blue-300 transition"><i class="fab fa-linkedin text-xl"></i></a>
+            </div>
+            <p class="mt-6 text-gray-400 text-sm">© 2023 Vector Visualizer. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Vector data
+        const vectors = {
+            a: { x: 100, y: 50 },
+            b: { x: 50, y: 100 },
+            scalar: 1.5
+        };
+        
+        // SVG elements
+        const svg = document.getElementById('vector-svg');
+        let currentOperation = null;
+        
+        // Initialize SVG
+        function initSVG() {
+            // Set SVG viewBox to center origin
+            svg.setAttribute('viewBox', '-250 -250 500 500');
+            
+            // Draw coordinate system
+            drawCoordinateSystem();
+            
+            // Draw initial vectors
+            drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+            drawVector(vectors.b, 'B', 'vector-b', 'vectorGreen');
+            
+            // Set initial operation
+            setOperation('addition');
+        }
+        
+        // Draw coordinate system
+        function drawCoordinateSystem() {
+            // Clear SVG
+            svg.innerHTML = '';
+            
+            // Draw grid lines
+            for (let i = -200; i <= 200; i += 20) {
+                if (i === 0) continue;
+                
+                const lineX = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                lineX.setAttribute('x1', i);
+                lineX.setAttribute('y1', -200);
+                lineX.setAttribute('x2', i);
+                lineX.setAttribute('y2', 200);
+                lineX.setAttribute('stroke', 'rgba(0, 0, 0, 0.1)');
+                lineX.setAttribute('stroke-width', '1');
+                svg.appendChild(lineX);
+                
+                const lineY = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                lineY.setAttribute('x1', -200);
+                lineY.setAttribute('y1', i);
+                lineY.setAttribute('x2', 200);
+                lineY.setAttribute('y2', i);
+                lineY.setAttribute('stroke', 'rgba(0, 0, 0, 0.1)');
+                lineY.setAttribute('stroke-width', '1');
+                svg.appendChild(lineY);
+            }
+            
+            // Draw axes
+            const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            xAxis.setAttribute('x1', -220);
+            xAxis.setAttribute('y1', 0);
+            xAxis.setAttribute('x2', 220);
+            xAxis.setAttribute('y2', 0);
+            xAxis.setAttribute('stroke', '#000');
+            xAxis.setAttribute('stroke-width', '1.5');
+            svg.appendChild(xAxis);
+            
+            const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            yAxis.setAttribute('x1', 0);
+            yAxis.setAttribute('y1', -220);
+            yAxis.setAttribute('x2', 0);
+            yAxis.setAttribute('y2', 220);
+            yAxis.setAttribute('stroke', '#000');
+            yAxis.setAttribute('stroke-width', '1.5');
+            svg.appendChild(yAxis);
+            
+            // Draw axis labels
+            const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            xLabel.setAttribute('x', 210);
+            xLabel.setAttribute('y', 15);
+            xLabel.setAttribute('fill', '#000');
+            xLabel.setAttribute('font-size', '14');
+            xLabel.setAttribute('text-anchor', 'middle');
+            xLabel.textContent = 'X';
+            svg.appendChild(xLabel);
+            
+            const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            yLabel.setAttribute('x', -15);
+            yLabel.setAttribute('y', -210);
+            yLabel.setAttribute('fill', '#000');
+            yLabel.setAttribute('font-size', '14');
+            yLabel.setAttribute('text-anchor', 'middle');
+            yLabel.textContent = 'Y';
+            svg.appendChild(yLabel);
+            
+            // Draw origin
+            const origin = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            origin.setAttribute('cx', 0);
+            origin.setAttribute('cy', 0);
+            origin.setAttribute('r', 3);
+            origin.setAttribute('fill', '#000');
+            svg.appendChild(origin);
+        }
+        
+        // Draw a vector
+        function drawVector(vector, label, id, colorClass, startX = 0, startY = 0) {
+            const endX = startX + vector.x;
+            const endY = startY + vector.y;
+            
+            // Draw vector line
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', startX);
+            line.setAttribute('y1', startY);
+            line.setAttribute('x2', endX);
+            line.setAttribute('y2', endY);
+            line.setAttribute('stroke', colorClass);
+            line.setAttribute('stroke-width', '3');
+            line.setAttribute('marker-end', `url(#arrowhead-${colorClass})`);
+            line.classList.add(id);
+            svg.appendChild(line);
+            
+            // Draw vector label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', endX + 10);
+            text.setAttribute('y', endY - 10);
+            text.setAttribute('fill', colorClass);
+            text.setAttribute('font-size', '14');
+            text.setAttribute('font-weight', 'bold');
+            text.textContent = label;
+            svg.appendChild(text);
+            
+            // Create arrowhead marker if it doesn't exist
+            if (!document.getElementById(`arrowhead-${colorClass}`)) {
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                marker.setAttribute('id', `arrowhead-${colorClass}`);
+                marker.setAttribute('markerWidth', '10');
+                marker.setAttribute('markerHeight', '10');
+                marker.setAttribute('refX', '8');
+                marker.setAttribute('refY', '3');
+                marker.setAttribute('orient', 'auto');
+                marker.setAttribute('markerUnits', 'strokeWidth');
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M0,0 L0,6 L9,3 z');
+                path.setAttribute('fill', colorClass);
+                path.classList.add('arrowhead');
+                
+                marker.appendChild(path);
+                defs.appendChild(marker);
+                svg.appendChild(defs);
+            }
+        }
+        
+        // Vector operations
+        const operations = {
+            addition: {
+                name: "Vector Addition",
+                description: "The sum of two vectors A and B is a new vector formed by adding corresponding components.",
+                calculate: () => ({ x: vectors.a.x + vectors.b.x, y: vectors.a.y + vectors.b.y }),
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    drawVector(vectors.b, 'B', 'vector-b', 'vectorGreen');
+                    const result = operations.addition.calculate();
+                    drawVector(result, 'A+B', 'vector-result', 'vectorRed');
+                },
+                resultText: (result) => `A + B = (${vectors.a.x} + ${vectors.b.x}, ${vectors.a.y} + ${vectors.b.y}) = (${result.x}, ${result.y})`
+            },
+            
+            subtraction: {
+                name: "Vector Subtraction",
+                description: "The difference between two vectors A and B is a new vector formed by subtracting corresponding components.",
+                calculate: () => ({ x: vectors.a.x - vectors.b.x, y: vectors.a.y - vectors.b.y }),
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    drawVector(vectors.b, 'B', 'vector-b', 'vectorGreen');
+                    const result = operations.subtraction.calculate();
+                    drawVector(result, 'A-B', 'vector-result', 'vectorRed');
+                },
+                resultText: (result) => `A - B = (${vectors.a.x} - ${vectors.b.x}, ${vectors.a.y} - ${vectors.b.y}) = (${result.x}, ${result.y})`
+            },
+            
+            'scalar-mult': {
+                name: "Scalar Multiplication",
+                description: "Multiplying a vector by a scalar k scales the vector's magnitude by |k| and reverses direction if k is negative.",
+                calculate: () => ({ x: vectors.a.x * vectors.scalar, y: vectors.a.y * vectors.scalar }),
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    const result = operations['scalar-mult'].calculate();
+                    drawVector(result, `k·A (k=${vectors.scalar})`, 'vector-result', 'vectorRed');
+                },
+                resultText: (result) => `k · A = ${vectors.scalar} · (${vectors.a.x}, ${vectors.a.y}) = (${result.x}, ${result.y})`
+            },
+            
+            'scalar-div': {
+                name: "Scalar Division",
+                description: "Dividing a vector by a scalar k is equivalent to multiplying by 1/k.",
+                calculate: () => ({ x: vectors.a.x / vectors.scalar, y: vectors.a.y / vectors.scalar }),
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    const result = operations['scalar-div'].calculate();
+                    drawVector(result, `A/k (k=${vectors.scalar})`, 'vector-result', 'vectorRed');
+                },
+                resultText: (result) => `A / k = (${vectors.a.x}, ${vectors.a.y}) / ${vectors.scalar} = (${result.x}, ${result.y})`
+            },
+            
+            normalization: {
+                name: "Normalization",
+                description: "Normalization converts a vector to a unit vector (length=1) in the same direction.",
+                calculate: () => {
+                    const mag = Math.sqrt(vectors.a.x**2 + vectors.a.y**2);
+                    return { x: vectors.a.x / mag, y: vectors.a.y / mag };
+                },
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    const result = operations.normalization.calculate();
+                    drawVector({x: result.x * 50, y: result.y * 50}, 'Â', 'vector-result', 'vectorRed');
+                },
+                resultText: (result) => {
+                    const mag = Math.sqrt(vectors.a.x**2 + vectors.a.y**2);
+                    return `Â = A / ||A|| = (${vectors.a.x}, ${vectors.a.y}) / ${mag.toFixed(2)} = (${result.x.toFixed(2)}, ${result.y.toFixed(2)})`;
+                }
+            },
+            
+            magnitude: {
+                name: "Magnitude",
+                description: "The magnitude (length) of a vector is calculated using the Pythagorean theorem.",
+                calculate: () => Math.sqrt(vectors.a.x**2 + vectors.a.y**2),
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    
+                    // Draw magnitude indicator
+                    const magnitude = operations.magnitude.calculate();
+                    const magnitudeText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    magnitudeText.setAttribute('x', vectors.a.x/2);
+                    magnitudeText.setAttribute('y', vectors.a.y/2 - 15);
+                    magnitudeText.setAttribute('fill', 'vectorYellow');
+                    magnitudeText.setAttribute('font-size', '14');
+                    magnitudeText.setAttribute('text-anchor', 'middle');
+                    magnitudeText.textContent = `||A|| = ${magnitude.toFixed(2)}`;
+                    svg.appendChild(magnitudeText);
+                },
+                resultText: (result) => `||A|| = √(${vectors.a.x}² + ${vectors.a.y}²) = ${result.toFixed(2)}`
+            },
+            
+            sqrMagnitude: {
+                name: "Squared Magnitude",
+                description: "The squared magnitude is often used in optimizations to avoid expensive square root operations.",
+                calculate: () => vectors.a.x**2 + vectors.a.y**2,
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    
+                    // Draw magnitude indicator
+                    const sqrMagnitude = operations.sqrMagnitude.calculate();
+                    const magnitudeText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    magnitudeText.setAttribute('x', vectors.a.x/2);
+                    magnitudeText.setAttribute('y', vectors.a.y/2 - 15);
+                    magnitudeText.setAttribute('fill', 'vectorYellow');
+                    magnitudeText.setAttribute('font-size', '14');
+                    magnitudeText.setAttribute('text-anchor', 'middle');
+                    magnitudeText.textContent = `||A||² = ${sqrMagnitude}`;
+                    svg.appendChild(magnitudeText);
+                },
+                resultText: (result) => `||A||² = ${vectors.a.x}² + ${vectors.a.y}² = ${result}`
+            },
+            
+            dot: {
+                name: "Dot Product",
+                description: "The dot product measures the similarity between two vectors. It's proportional to the cosine of the angle between them.",
+                calculate: () => vectors.a.x * vectors.b.x + vectors.a.y * vectors.b.y,
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    drawVector(vectors.b, 'B', 'vector-b', 'vectorGreen');
+                    
+                    // Draw angle indicator
+                    const dotProduct = operations.dot.calculate();
+                    const angleText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    angleText.setAttribute('x', 30);
+                    angleText.setAttribute('y', -30);
+                    angleText.setAttribute('fill', 'vectorPurple');
+                    angleText.setAttribute('font-size', '14');
+                    angleText.textContent = `A·B = ${dotProduct}`;
+                    svg.appendChild(angleText);
+                },
+                resultText: (result) => `A·B = (${vectors.a.x}×${vectors.b.x}) + (${vectors.a.y}×${vectors.b.y}) = ${result}`
+            },
+            
+            cross: {
+                name: "Cross Product",
+                description: "In 2D, the cross product returns a scalar representing the area of the parallelogram formed by the two vectors.",
+                calculate: () => vectors.a.x * vectors.b.y - vectors.a.y * vectors.b.x,
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    drawVector(vectors.b, 'B', 'vector-b', 'vectorGreen');
+                    
+                    // Draw parallelogram
+                    const crossProduct = operations.cross.calculate();
+                    const para = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    para.setAttribute('points', `0,0 ${vectors.a.x},${vectors.a.y} ${vectors.a.x + vectors.b.x},${vectors.a.y + vectors.b.y} ${vectors.b.x},${vectors.b.y}`);
+                    para.setAttribute('fill', 'rgba(20, 184, 166, 0.2)');
+                    para.setAttribute('stroke', 'rgba(20, 184, 166, 0.5)');
+                    para.setAttribute('stroke-width', '1');
+                    svg.appendChild(para);
+                    
+                    const areaText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    areaText.setAttribute('x', (vectors.a.x + vectors.b.x)/2);
+                    areaText.setAttribute('y', (vectors.a.y + vectors.b.y)/2);
+                    areaText.setAttribute('fill', 'vectorTeal');
+                    areaText.setAttribute('font-size', '14');
+                    areaText.setAttribute('text-anchor', 'middle');
+                    areaText.textContent = `A×B = ${crossProduct}`;
+                    svg.appendChild(areaText);
+                },
+                resultText: (result) => `A×B = (${vectors.a.x}×${vectors.b.y}) - (${vectors.a.y}×${vectors.b.x}) = ${result}`
+            },
+            
+            'projection-a': {
+                name: "Projection of A onto B",
+                description: "The projection of A onto B is the component of A that lies along the direction of B.",
+                calculate: () => {
+                    const dot = vectors.a.x * vectors.b.x + vectors.a.y * vectors.b.y;
+                    const sqrMagB = vectors.b.x**2 + vectors.b.y**2;
+                    const scalar = dot / sqrMagB;
+                    return { x: scalar * vectors.b.x, y: scalar * vectors.b.y };
+                },
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    drawVector(vectors.b, 'B', 'vector-b', 'vectorGreen');
+                    const projection = operations['projection-a'].calculate();
+                    drawVector(projection, 'projB A', 'vector-projection', 'vectorPurple');
+                    
+                    // Draw perpendicular
+                    const perpendicular = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    perpendicular.setAttribute('x1', projection.x);
+                    perpendicular.setAttribute('y1', projection.y);
+                    perpendicular.setAttribute('x2', vectors.a.x);
+                    perpendicular.setAttribute('y2', vectors.a.y);
+                    perpendicular.setAttribute('stroke', 'rgba(139, 92, 246, 0.5)');
+                    perpendicular.setAttribute('stroke-width', '1');
+                    perpendicular.setAttribute('stroke-dasharray', '5,5');
+                    svg.appendChild(perpendicular);
+                },
+                resultText: (result) => {
+                    const dot = vectors.a.x * vectors.b.x + vectors.a.y * vectors.b.y;
+                    const sqrMagB = vectors.b.x**2 + vectors.b.y**2;
+                    return `proj<sub>B</sub>A = [(${dot}) / (${sqrMagB})] × B = (${result.x.toFixed(2)}, ${result.y.toFixed(2)})`;
+                }
+            },
+            
+            'projection-b': {
+                name: "Projection of B onto A",
+                description: "The projection of B onto A is the component of B that lies along the direction of A.",
+                calculate: () => {
+                    const dot = vectors.a.x * vectors.b.x + vectors.a.y * vectors.b.y;
+                    const sqrMagA = vectors.a.x**2 + vectors.a.y**2;
+                    const scalar = dot / sqrMagA;
+                    return { x: scalar * vectors.a.x, y: scalar * vectors.a.y };
+                },
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    drawVector(vectors.b, 'B', 'vector-b', 'vectorGreen');
+                    const projection = operations['projection-b'].calculate();
+                    drawVector(projection, 'projA B', 'vector-projection', 'vectorPurple');
+                    
+                    // Draw perpendicular
+                    const perpendicular = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    perpendicular.setAttribute('x1', projection.x);
+                    perpendicular.setAttribute('y1', projection.y);
+                    perpendicular.setAttribute('x2', vectors.b.x);
+                    perpendicular.setAttribute('y2', vectors.b.y);
+                    perpendicular.setAttribute('stroke', 'rgba(139, 92, 246, 0.5)');
+                    perpendicular.setAttribute('stroke-width', '1');
+                    perpendicular.setAttribute('stroke-dasharray', '5,5');
+                    svg.appendChild(perpendicular);
+                },
+                resultText: (result) => {
+                    const dot = vectors.a.x * vectors.b.x + vectors.a.y * vectors.b.y;
+                    const sqrMagA = vectors.a.x**2 + vectors.a.y**2;
+                    return `proj<sub>A</sub>B = [(${dot}) / (${sqrMagA})] × A = (${result.x.toFixed(2)}, ${result.y.toFixed(2)})`;
+                }
+            },
+            
+            reflection: {
+                name: "Reflection",
+                description: "Reflection of vector A over vector B is calculated as 2 times the projection of A on B minus A.",
+                calculate: () => {
+                    const dot = vectors.a.x * vectors.b.x + vectors.a.y * vectors.b.y;
+                    const sqrMagB = vectors.b.x**2 + vectors.b.y**2;
+                    const scalar = 2 * dot / sqrMagB;
+                    return { 
+                        x: scalar * vectors.b.x - vectors.a.x, 
+                        y: scalar * vectors.b.y - vectors.a.y 
+                    };
+                },
+                draw: () => {
+                    drawVector(vectors.a, 'A', 'vector-a', 'vectorBlue');
+                    drawVector(vectors.b, 'B', 'vector-b', 'vectorGreen');
+                    
+                    // Draw projection
+                    const projection = operations['projection-a'].calculate();
+                    drawVector(projection, 'projB A', 'vector-projection', 'vectorPurple');
+                    
+                    // Draw reflection
+                    const reflection = operations.reflection.calculate();
+                    drawVector(reflection, 'Reflection', 'vector-reflection', 'vectorYellow');
+                    
+                    // Draw dashed line from A to reflection
+                    const reflectionLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    reflectionLine.setAttribute('x1', vectors.a.x);
+                    reflectionLine.setAttribute('y1', vectors.a.y);
+                    reflectionLine.setAttribute('x2', reflection.x);
+                    reflectionLine.setAttribute('y2', reflection.y);
+                    reflectionLine.setAttribute('stroke', 'rgba(245, 158, 11, 0.5)');
+                    reflectionLine.setAttribute('stroke-width', '1');
+                    reflectionLine.setAttribute('stroke-dasharray', '5,5');
+                    svg.appendChild(reflectionLine);
+                },
+                resultText: (result) => `Reflection = 2 × proj<sub>B</sub>A - A = (${result.x.toFixed(2)}, ${result.y.toFixed(2)})`
+            }
+        };
+        
+        // Set active operation
+        function setOperation(operationKey) {
+            currentOperation = operationKey;
+            
+            // Update UI
+            document.querySelectorAll('.operation-btn').forEach(btn => {
+                btn.classList.remove('operation-active', 'ring-2', 'ring-blue-500');
+            });
+            
+            const activeBtn = document.querySelector(`.operation-btn[data-operation="${operationKey}"]`);
+            activeBtn.classList.add('operation-active', 'ring-2', 'ring-blue-500');
+            
+            // Update operation details
+            const op = operations[operationKey];
+            document.getElementById('operation-details').innerHTML = `
+                <h4 class="font-semibold text-lg mb-2">${op.name}</h4>
+                <p>${op.description}</p>
+            `;
+            
+            // Redraw visualization
+            drawCoordinateSystem();
+            op.draw();
+            
+            // Update result text
+            const result = op.calculate();
+            document.getElementById('operation-result').innerHTML = op.resultText(result);
+        }
+        
+        // Update vector values
+        function updateVector(vector, component, value) {
+            vectors[vector][component] = parseInt(value);
+            document.getElementById(`${vector}-${component}-value`).textContent = value;
+            
+            if (currentOperation) {
+                drawCoordinateSystem();
+                operations[currentOperation].draw();
+                
+                const result = operations[currentOperation].calculate();
+                document.getElementById('operation-result').innerHTML = 
+                    operations[currentOperation].resultText(result);
+            }
+        }
+        
+        // Update scalar value
+        function updateScalar(value) {
+            vectors.scalar = parseFloat(value);
+            document.getElementById('scalar-value').textContent = value;
+            
+            if (currentOperation && (currentOperation === 'scalar-mult' || currentOperation === 'scalar-div')) {
+                drawCoordinateSystem();
+                operations[currentOperation].draw();
+                
+                const result = operations[currentOperation].calculate();
+                document.getElementById('operation-result').innerHTML = 
+                    operations[currentOperation].resultText(result);
+            }
+        }
+        
+        // Initialize event listeners
+        function initEventListeners() {
+            // Operation buttons
+            document.querySelectorAll('.operation-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setOperation(btn.dataset.operation);
+                });
+            });
+            
+            // Vector sliders
+            document.querySelectorAll('.vector-slider').forEach(slider => {
+                slider.addEventListener('input', (e) => {
+                    const vector = e.target.dataset.vector;
+                    const component = e.target.dataset.component;
+                    updateVector(vector, component, e.target.value);
+                });
+            });
+            
+            // Scalar slider
+            document.getElementById('scalar-slider').addEventListener('input', (e) => {
+                updateScalar(e.target.value);
+            });
+        }
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            initSVG();
+            initEventListeners();
+        });
+    </script>
+</body>
+</html>
