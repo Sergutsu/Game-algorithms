@@ -358,7 +358,7 @@ def query(node, q, out):
         games=["Unity Animation Compression", "Unreal Anim Compression", "For Honor", "Mortal Kombat 11"],
     ),
     dict(
-        n=31, id="portals", cat="math", level=3,
+        n=37, id="portals", cat="math", level=3,
         title="Порталы и неевклидова геометрия",
         en="Portals and non-Euclidean geometry",
         tags=["проективная геометрия", "кватернионы", "recursion"],
@@ -405,7 +405,7 @@ void OnTriggerEnter(Collider other)
         demo="portal",
     ),
     dict(
-        n=32, id="topology", cat="math", level=3,
+        n=38, id="topology", cat="math", level=3,
         title="Геймплей на торе и ленте Мёбиуса",
         en="Topological gameplay (torus, Möbius)",
         tags=["топология", "склейки", "эйлерова характеристика"],
@@ -451,7 +451,7 @@ def wrapped_delta(a, b, w):
         games=["Pac-Man (torus)", "Hyperbolica", "Möbius games (jam)", "Antichamber"],
     ),
     dict(
-        n=33, id="entanglement", cat="math", level=3,
+        n=39, id="entanglement", cat="math", level=3,
         title="Система квантовой запутанности",
         en="Entanglement as a game mechanic",
         tags=["тензорная алгебра", "гильбертово пространство", "Белл"],
@@ -498,7 +498,7 @@ def chsh(samples=20000, rng=random.Random(1)):
         games=["Quantum Conundrum", "Antichamber", "Schrödinger's Cat", "Qubit puzzles"],
     ),
     dict(
-        n=34, id="chaos", cat="math", level=3,
+        n=40, id="chaos", cat="math", level=3,
         title="Динамические системы и хаос",
         en="Chaos, bifurcations and attractors",
         tags=["теория хаоса", "аттракторы", "ляпуновские показатели"],
@@ -521,7 +521,7 @@ def chsh(samples=20000, rng=random.Random(1)):
                     "Бифуркационная диаграмма на 1000×1000 — миллион итераций, считается секунды."),
         code=("python", """import math
 
-def logistic(r, x0=0.5, n=1000, skip=100):
+def logistic(r, x0=0.5, n=1006, skip=100):
     x, out = x0, []
     for i in range(n + skip):
         x = r * x * (1 - x)
@@ -529,7 +529,7 @@ def logistic(r, x0=0.5, n=1000, skip=100):
             out.append(x)
     return out
 
-def lyapunov(r, x0=0.5, n=2000, skip=200):
+def lyapunov(r, x0=0.5, n=2006, skip=200):
     x, total = x0, 0.0
     for i in range(n + skip):
         x = r * x * (1 - x)
