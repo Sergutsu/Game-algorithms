@@ -3,7 +3,7 @@
 
 TOPICS_4 = [
     dict(
-        n=35, id="weaponbalance", cat="stats", level=2,
+        n=41, id="weaponbalance", cat="stats", level=2,
         title="Анализ игрового баланса оружия",
         en="Weapon balance analysis (regression, ANOVA)",
         tags=["регрессия", "ANOVA", "TTK"],
@@ -51,7 +51,7 @@ def simple_regression(xs, ys):
         games=["CS2", "Valorant", "Apex Legends", "Rainbow Six Siege"],
     ),
     dict(
-        n=36, id="matchmaking", cat="stats", level=3,
+        n=42, id="matchmaking", cat="stats", level=3,
         title="Система matchmaking для ранговых игр",
         en="Matchmaking with Elo, Glicko-2 and TrueSkill",
         tags=["Elo", "Glicko-2", "TrueSkill", "байес"],
@@ -98,7 +98,7 @@ def match_quality(mu_a, sigma_a, mu_b, sigma_b, beta=4.17):
         demo="elo",
     ),
     dict(
-        n=37, id="trends", cat="stats", level=3,
+        n=43, id="trends", cat="stats", level=3,
         title="Прогнозирование игровых трендов",
         en="Time-series forecasting (ARIMA, seasonality)",
         tags=["ARIMA", "сезонность", "аномалии"],
@@ -144,7 +144,7 @@ def mape(actual, forecast):
         demo="trend",
     ),
     dict(
-        n=38, id="loot", cat="stats", level=2,
+        n=44, id="loot", cat="stats", level=2,
         title="Вероятностные системы лута",
         en="Loot systems (Pareto, CLT, pity)",
         tags=["распределение Парето", "ЦПТ", "pity"],
@@ -198,7 +198,7 @@ class PityLoot:
         demo="loot",
     ),
     dict(
-        n=39, id="visibility", cat="geometry", level=2,
+        n=45, id="visibility", cat="geometry", level=2,
         title="Определение видимости в 3D-пространстве",
         en="Visibility: PVS, portals, BSP",
         tags=["BSP", "PVS", "occlusion culling"],
@@ -243,7 +243,7 @@ def bsp_classify(point, plane):
         games=["Quake", "Half-Life (BSP/PVS)", "Doom Eternal", "UE5 (Nanite + virtual shadow maps)"],
     ),
     dict(
-        n=40, id="ricochet", cat="geometry", level=1,
+        n=46, id="ricochet", cat="geometry", level=1,
         title="Расчёт траекторий рикошетов",
         en="Ricochet and reflection vectors",
         tags=["отражение", "закон Снелла", "случайность"],
@@ -287,7 +287,7 @@ def scatter(v, spread_deg=2.0, rng=random):
         games=["Rainbow Six Siege", "Sniper Elite", "Wanted: Dead", "Half-Life 2"],
     ),
     dict(
-        n=41, id="voxels", cat="geometry", level=3,
+        n=47, id="voxels", cat="geometry", level=3,
         title="Генерация воксельных миров",
         en="Voxel worlds and marching cubes",
         tags=["marching cubes", "SDF", "октодерево"],
@@ -334,7 +334,7 @@ def marching_edge(p1, p2, f1, f2):
         demo="voxel",
     ),
     dict(
-        n=42, id="textures", cat="graphics", level=2,
+        n=48, id="textures", cat="graphics", level=2,
         title="Процедурные текстуры материалов",
         en="Procedural textures (noise, FFT, weathering)",
         tags=["шум", "преобразования Фурье", "tiling"],
@@ -390,7 +390,7 @@ vec3 normalFromHeight(float h, vec2 uv, float strength) {
         games=["Substance Designer workflows", "No Man's Sky", "Elite Dangerous", "Dreams (PS4)"],
     ),
     dict(
-        n=43, id="distortion", cat="graphics", level=3,
+        n=49, id="distortion", cat="graphics", level=3,
         title="Эффекты искажения пространства",
         en="Screen-space distortion with complex numbers",
         tags=["комплексные числа", "конформные отображения", "UV"],
@@ -447,7 +447,7 @@ vec4 distort(sampler2D scene, vec2 uv, vec2 center) {
         games=["Control", "Returnal", "Superhot", "Geometry Wars"],
     ),
     dict(
-        n=44, id="optics", cat="graphics", level=3,
+        n=50, id="optics", cat="graphics", level=3,
         title="Симуляция оптических явлений",
         en="Optics: diffraction, BRDF, dispersion",
         tags=["Френель", "BRDF", "дифракция"],

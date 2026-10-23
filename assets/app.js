@@ -9,6 +9,11 @@
   const root = document.documentElement;
   const body = document.body;
 
+  /* ---------------- strings ---------------- */
+  const STR = window.GA_STRINGS || {};
+  const LANG = root.getAttribute('data-lang') === 'en' ? 'en' : 'ru';
+  const S = (key, fallback) => (STR[key] !== undefined ? STR[key] : (fallback || key));
+
   /* ---------------- theme ---------------- */
   const THEME_KEY = 'ga:theme';
   const themeButtons = $$('[data-theme-toggle]');
@@ -16,8 +21,8 @@
     root.setAttribute('data-theme', theme);
     themeButtons.forEach((b) => {
       const label = b.querySelector('[data-theme-label]');
-      if (label) label.textContent = theme === 'dark' ? 'светлая' : 'тёмная';
-      b.setAttribute('aria-label', theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему');
+      if (label) label.textContent = theme === 'dark' ? S('themeLight') : S('themeDark');
+      b.setAttribute('aria-label', theme === 'dark' ? S('themeToLight') : S('themeToDark'));
     });
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', theme === 'dark' ? '#08090d' : '#f4f2ea');
@@ -30,6 +35,38 @@
     applyTheme(next);
     try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* noop */ }
   }));
+
+  /* ---------------- language switch ---------------- */
+  const LANG_KEY = 'ga:lang';
+  const langLinks = $$('[data-lang-switch]');
+  langLinks.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const target = link.getAttribute('href') || 'index.html';
+      const hash = window.location.hash;
+      try {
+        localStorage.setItem(LANG_KEY, link.getAttribute('data-lang-switch') || LANG);
+        sessionStorage.setItem('ga:lang-explicit', '1');
+      } catch (err) { /* noop */ }
+      if (hash) {
+        e.preventDefault();
+        window.location.href = target + hash;
+      }
+    });
+  });
+
+  // on the home page we respect the saved language choice,
+  // but only if the user has not picked a language in this session
+  (function honourPreferredLanguage() {
+    if (LANG !== 'ru') return;                 // index.en.html always stays English
+    let pref = null;
+    try { pref = localStorage.getItem(LANG_KEY); } catch (e) { /* noop */ }
+    if (pref !== 'en') return;
+    let explicit = null;
+    try { explicit = sessionStorage.getItem('ga:lang-explicit'); } catch (e) { /* noop */ }
+    if (explicit) return;
+    if (!/index\.html$/.test(window.location.pathname.split('/').pop() || '')) return;
+    window.location.replace('index.en.html' + window.location.hash);
+  })();
 
   /* ---------------- print ---------------- */
   $$('[data-print]').forEach((b) => b.addEventListener('click', () => window.print()));
@@ -200,7 +237,7 @@
         btn.classList.toggle('is-done', isDone);
         btn.setAttribute('aria-pressed', String(isDone));
         const label = $('span:last-child', btn);
-        if (label) label.textContent = isDone ? 'изучено' : 'отметить изученным';
+        if (label) label.textContent = isDone ? S('done') : S('todo');
       }
     });
   }
@@ -224,9 +261,9 @@
     if (!code) return;
     const text = code.textContent;
     const finish = (ok) => {
-      btn.textContent = ok ? 'скопировано' : 'не вышло';
+      btn.textContent = ok ? S('copied') : S('failed');
       btn.classList.toggle('ok', ok);
-      setTimeout(() => { btn.textContent = 'копировать'; btn.classList.remove('ok'); }, 1600);
+      setTimeout(() => { btn.textContent = S('copy'); btn.classList.remove('ok'); }, 1600);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(() => finish(true)).catch(() => finish(false));
@@ -258,7 +295,7 @@
         pauseBtn.addEventListener('click', () => {
           if (!inst) return;
           const paused = inst.toggle();
-          pauseBtn.textContent = paused ? 'продолжить' : 'пауза';
+          pauseBtn.textContent = paused ? S('resume') : S('pause');
           pauseBtn.setAttribute('aria-pressed', String(paused));
         });
       }
@@ -268,7 +305,7 @@
           if (inst.reset) inst.reset();
           if (inst.paused && pauseBtn) {
             inst.toggle();
-            pauseBtn.textContent = 'пауза';
+            pauseBtn.textContent = S('pause');
           }
         });
       }
@@ -284,7 +321,7 @@
             } catch (err) {
               el.querySelector('.demo-body').innerHTML =
                 '<div style="padding:16px;font:11px ui-monospace,monospace;color:#fda4af">' +
-                'не удалось запустить демо: ' + String(err).slice(0, 120) + '</div>';
+                S('demoFailed') + String(err).slice(0, 120) + '</div>';
               return;
             }
           }

@@ -7,6 +7,7 @@
   'use strict';
 
   const DEMOS = (window.GA_DEMOS = window.GA_DEMOS || {});
+  const T = (key) => window.GA_T(key);
   const C = {
     acid: '#c8f751', mint: '#6ee7b7', sky: '#7dd3fc', amber: '#fbbf6b',
     rose: '#fda4af', violet: '#c4b5fd', ink: '#e7eddf', dim: '#6b7368',
@@ -20,7 +21,7 @@
     const stageEl = document.createElement('div');
     stageEl.className = 'demo-stage';
     const canvas = document.createElement('canvas');
-    canvas.setAttribute('aria-label', 'Интерактивная визуализация');
+    canvas.setAttribute('aria-label', T('viz'));
     stageEl.appendChild(canvas);
     const controls = document.createElement('div');
     controls.className = 'demo-controls';
@@ -125,7 +126,7 @@
         try {
           draw(dt, now / 1000);
         } catch (e) {
-          // не роняем страницу из-за одного кадра, но сообщаем в консоль один раз
+          // one bad frame must not kill the page, but we report it to the console once
           if (!window.__gaDemoWarned) { window.__gaDemoWarned = true; console.warn('[demo]', e); }
         }
       }
@@ -192,7 +193,7 @@
     let lastStats = { range: 0, apex: 0, tof: 0 };
 
     const setReadout = readout(st.readout, [
-      ['range', 'дальность'], ['apex', 'высота'], ['tof', 'время']
+      ['range', T('range')], ['apex', T('apex')], ['tof', T('flight')]
     ]);
 
     function accel(vx, vy) {
@@ -229,7 +230,7 @@
         if (pts.length < 2000) pts.push({ x: s.x, y: s.y });
       }
       lastStats = { range: s.x, apex, tof: t };
-      // плавно подгоняем масштаб под траекторию
+      // smoothly fit the scale to the trajectory
       fitRange += (Math.max(30, s.x) - fitRange) * 0.12;
       fitApex += (Math.max(20, apex) - fitApex) * 0.12;
       return pts;
@@ -260,10 +261,10 @@
 
     function onParam() { reset(); predict(); }
 
-    slider(st.controls, 'угол', 5, 80, params.angle, 1, v => v + '°', v => { params.angle = v; onParam(); });
-    slider(st.controls, 'скорость', 20, 130, params.speed, 1, v => v + ' м/с', v => { params.speed = v; onParam(); });
-    slider(st.controls, 'сопротивление', 0, 0.0016, params.drag, 0.00005, v => v.toFixed(4), v => { params.drag = v; onParam(); });
-    slider(st.controls, 'ветер', -18, 18, params.wind, 1, v => v + ' м/с', v => { params.wind = v; onParam(); });
+    slider(st.controls, T('angle'), 5, 80, params.angle, 1, v => v + '°', v => { params.angle = v; onParam(); });
+    slider(st.controls, T('speed'), 20, 130, params.speed, 1, v => v + T('ms_unit'), v => { params.speed = v; onParam(); });
+    slider(st.controls, T('drag'), 0, 0.0016, params.drag, 0.00005, v => v.toFixed(4), v => { params.drag = v; onParam(); });
+    slider(st.controls, T('wind'), -18, 18, params.wind, 1, v => v + T('ms_unit'), v => { params.wind = v; onParam(); });
 
     let predictTimer = 0;
     reset();
@@ -360,11 +361,11 @@
       st.ctx.lineTo(lx + Math.cos(rad) * 20, ly - Math.sin(rad) * 20);
       st.ctx.stroke();
 
-      label(st.ctx, 'ветер ' + params.wind + ' м/с', 10, 14, C.dim, 9);
+      label(st.ctx, T('wind_pad') + params.wind + T('ms_unit'), 10, 14, C.dim, 9);
       setReadout({
-        range: lastStats.range.toFixed(0) + ' м',
-        apex: lastStats.apex.toFixed(1) + ' м',
-        tof: lastStats.tof.toFixed(2) + ' с'
+        range: lastStats.range.toFixed(0) + T('m_unit'),
+        apex: lastStats.apex.toFixed(1) + T('m_unit'),
+        tof: lastStats.tof.toFixed(2) + T('s_unit')
       });
     });
     handle.reset = reset;
@@ -388,7 +389,7 @@
     }
     const mouse = { x: 0, y: 0, active: false };
     const params = { cohesion: 1.0, separation: 1.0, speed: 1.0 };
-    const setReadout = readout(st.readout, [['n', 'агентов'], ['align', 'выравнивание'], ['spread', 'радиус']]);
+    const setReadout = readout(st.readout, [['n', T('agents')], ['align', T('alignment')], ['spread', T('radius')]]);
 
     st.canvas.addEventListener('pointermove', (e) => {
       const r = st.canvas.getBoundingClientRect();
@@ -398,8 +399,8 @@
     });
     st.canvas.addEventListener('pointerleave', () => { mouse.active = false; });
 
-    slider(st.controls, 'сплочённость', 0, 2.4, params.cohesion, 0.05, v => v.toFixed(2), v => params.cohesion = v);
-    slider(st.controls, 'дистанция', 0.2, 2.4, params.separation, 0.05, v => v.toFixed(2), v => params.separation = v);
+    slider(st.controls, T('cohesion'), 0, 2.4, params.cohesion, 0.05, v => v.toFixed(2), v => params.cohesion = v);
+    slider(st.controls, T('separation'), 0.2, 2.4, params.separation, 0.05, v => v.toFixed(2), v => params.separation = v);
 
     function frame(dt) {
       const SEP = 24, ALI = 58, COH = 96;
@@ -420,7 +421,7 @@
           if (d < COH) { cx += o.x; cy += o.y; cN++; }
         }
         let fx = 0, fy = 0;
-        // separation: сильнее при близости
+        // separation: stronger when the birds are close
         if (sxN) {
           const m = Math.hypot(sx, sy) || 1;
           fx -= (sx / m) * 150 * params.separation;
@@ -489,7 +490,7 @@
       if (mouse.active) {
         st.ctx.strokeStyle = 'rgba(125,211,252,0.5)';
         st.ctx.beginPath(); st.ctx.arc(mouse.x, mouse.y, 22, 0, TAU); st.ctx.stroke();
-        label(st.ctx, 'притяжение', mouse.x + 28, mouse.y, C.sky, 9);
+        label(st.ctx, T('attraction'), mouse.x + 28, mouse.y, C.sky, 9);
       }
       setReadout({
         n: agents.length,
@@ -515,7 +516,7 @@
     let bitmap = null;
     let bw = 0, bh = 0;
     let builtW = 0;
-    const setReadout = readout(st.readout, [['land', 'суша'], ['peak', 'пик'], ['seed', 'сид']]);
+    const setReadout = readout(st.readout, [['land', T('land')], ['peak', T('peak')], ['seed', T('seed')]]);
 
     function hash2(x, y, seed) {
       let h = Math.imul(x | 0, 374761393) ^ Math.imul(y | 0, 668265263) ^ Math.imul(seed | 0, 1442695041);
@@ -548,9 +549,9 @@
           let h = fbm(x / bw * 4.2, y / bh * 4.2, params.octaves, params.seed);
           const warp = fbm(x / bw * 2.1 + 5, y / bh * 2.1 + 9, 3, params.seed + 31);
           h = h * 0.76 + warp * 0.24;
-          // контраст: растягиваем узкое распределение fBm
+          // contrast: stretch the narrow fBm distribution
           h = Math.min(1, Math.max(0, (h - 0.5) * 2.5 + 0.5));
-          // мягкая терраса у берега
+          // a soft terrace near the shore
           h = h < 0.45 ? h * 0.94 : h;
           heights[y * bw + x] = h;
         }
@@ -560,7 +561,7 @@
       const bctx = bitmap.getContext('2d');
       const img = bctx.createImageData(bw, bh);
       const at = (x, y) => heights[Math.min(bh - 1, Math.max(0, y)) * bw + Math.min(bw - 1, Math.max(0, x))];
-      // направление света: северо-запад
+      // light direction: north-west
       const LX = -0.55, LY = -0.62, LZ = 0.56;
       const ll = Math.hypot(LX, LY, LZ);
       let land = 0, peak = 0;
@@ -579,7 +580,7 @@
             continue;
           }
           land++;
-          // нормаль из карты высот
+          // the normal from the height map
           const dzdx = (at(x + 1, y) - at(x - 1, y)) * 26;
           const dzdy = (at(x, y + 1) - at(x, y - 1)) * 26;
           const nx = -dzdx, ny = -dzdy, nz = 1;
@@ -588,17 +589,17 @@
           shade = 0.55 + Math.max(0, shade) * 0.62;
           const hn = (h - params.sea) / Math.max(0.05, 1 - params.sea);
           let r, g, b;
-          if (hn < 0.05) { r = 206; g = 192; b = 148; }               // пляж
-          else if (hn < 0.34) {                                       // луга
+          if (hn < 0.05) { r = 206; g = 192; b = 148; }               // beach
+          else if (hn < 0.34) {                                       // meadow
             const t = (hn - 0.05) / 0.29;
             r = 92 + t * 24; g = 132 + t * 14; b = 70 + t * 8;
-          } else if (hn < 0.62) {                                     // лес
+          } else if (hn < 0.62) {                                     // forest
             const t = (hn - 0.34) / 0.28;
             r = 74 + t * 26; g = 100 + t * 14; b = 62 + t * 20;
-          } else if (hn < 0.84) {                                     // скалы
+          } else if (hn < 0.84) {                                     // rocks
             const t = (hn - 0.62) / 0.22;
             r = 112 + t * 34; g = 110 + t * 32; b = 104 + t * 32;
-          } else {                                                    // снег
+          } else {                                                    // snow
             const t = Math.min(1, (hn - 0.84) / 0.16);
             r = 196 + t * 56; g = 205 + t * 48; b = 214 + t * 40;
           }
@@ -617,9 +618,9 @@
       });
     }
 
-    slider(st.controls, 'октавы', 2, 8, params.octaves, 1, v => v, v => { params.octaves = v; build(); });
-    slider(st.controls, 'уровень моря', 0.2, 0.62, params.sea, 0.01, v => v.toFixed(2), v => { params.sea = v; build(); });
-    button(st.controls, 'новый сид', () => {
+    slider(st.controls, T('octaves'), 2, 8, params.octaves, 1, v => v, v => { params.octaves = v; build(); });
+    slider(st.controls, T('sea_level'), 0.2, 0.62, params.sea, 0.01, v => v.toFixed(2), v => { params.sea = v; build(); });
+    button(st.controls, T('new_seed'), () => {
       params.seed = Math.floor(Math.random() * 99999);
       build();
     });
@@ -634,7 +635,7 @@
       st.ctx.drawImage(bitmap, 0, 0, st.w, st.h);
       st.ctx.restore();
       // sea contour
-      label(st.ctx, 'hillshade · fBm · ' + params.octaves + ' октав', 10, 13, 'rgba(255,255,255,0.5)', 9);
+      label(st.ctx, 'hillshade · fBm · ' + params.octaves + T('octaves_unit'), 10, 13, 'rgba(255,255,255,0.5)', 9);
     });
     handle.reset = () => { params.seed = 1337; params.sea = 0.42; build(); };
     return handle;
@@ -646,10 +647,10 @@
   DEMOS.waves = function (el) {
     const st = makeStage(el);
     const params = { amp: 1.0, wind: 1.0, chop: 1.0 };
-    const setReadout = readout(st.readout, [['h', 'высота волны'], ['t', 'период'], ['e', 'энергия']]);
-    slider(st.controls, 'амплитуда', 0.2, 2.2, params.amp, 0.05, v => v.toFixed(2) + '×', v => params.amp = v);
-    slider(st.controls, 'ветер', 0.2, 2.4, params.wind, 0.05, v => v.toFixed(2) + '×', v => params.wind = v);
-    slider(st.controls, 'крутизна', 0, 1, params.chop, 0.02, v => v.toFixed(2), v => params.chop = v);
+    const setReadout = readout(st.readout, [['h', T('wave_height')], ['t', T('period')], ['e', T('energy')]]);
+    slider(st.controls, T('amplitude'), 0.2, 2.2, params.amp, 0.05, v => v.toFixed(2) + '×', v => params.amp = v);
+    slider(st.controls, T('wind'), 0.2, 2.4, params.wind, 0.05, v => v.toFixed(2) + '×', v => params.wind = v);
+    slider(st.controls, T('steepness'), 0, 1, params.chop, 0.02, v => v.toFixed(2), v => params.chop = v);
 
     const waveDefs = [
       { k: 0.9, s: 0.55, a: 1.0 },
@@ -778,9 +779,9 @@
 
       label(ctx, 'FFT / Gerstner', 10, 13, 'rgba(255,255,255,0.45)', 9);
       setReadout({
-        h: (params.amp * 1.9).toFixed(1) + ' м',
-        t: (2.4 / params.wind).toFixed(1) + ' с',
-        e: (params.amp * params.amp * params.wind * 30).toFixed(0) + ' кВт/м'
+        h: (params.amp * 1.9).toFixed(1) + T('m_unit'),
+        t: (2.4 / params.wind).toFixed(1) + T('s_unit'),
+        e: (params.amp * params.amp * params.wind * 30).toFixed(0) + T('kw_unit')
       });
     });
     handle.reset = () => { time = 0; };
@@ -807,13 +808,13 @@
     let cells = [];
     let desync = false;
     const setReadout = readout(st.readout, [
-      ['tick', 'тик'], ['safe', 'безопасный тик'], ['hash', 'хэши'], ['status', 'статус']
+      ['tick', T('tick')], ['safe', T('safe_tick')], ['hash', T('hashes')], ['status', T('status')]
     ]);
 
-    slider(st.controls, 'лаг A', 0, 300, clients[0].lat, 5, v => v + ' мс', v => clients[0].lat = v);
-    slider(st.controls, 'лаг B', 0, 300, clients[1].lat, 5, v => v + ' мс', v => clients[1].lat = v);
-    slider(st.controls, 'лаг C', 0, 300, clients[2].lat, 5, v => v + ' мс', v => clients[2].lat = v);
-    toggle(st.controls, 'float-дрейф', false, v => { params.float = v; cells = []; simTick = 0; acc = 0; });
+    slider(st.controls, T('lag_a'), 0, 300, clients[0].lat, 5, v => v + T('ms_unit_ms'), v => clients[0].lat = v);
+    slider(st.controls, T('lag_b'), 0, 300, clients[1].lat, 5, v => v + T('ms_unit_ms'), v => clients[1].lat = v);
+    slider(st.controls, T('lag_c'), 0, 300, clients[2].lat, 5, v => v + T('ms_unit_ms'), v => clients[2].lat = v);
+    toggle(st.controls, T('float_drift'), false, v => { params.float = v; cells = []; simTick = 0; acc = 0; });
 
     let drift = clients.map((c, i) => (i + 1) * 1e-6);
 
@@ -823,7 +824,7 @@
     }
 
     function stepClient(i) {
-      // у всех клиентов одинаковый тик и одинаковый PRNG — состояние совпадает
+      // every client has the same tick and the same PRNG, so the states match
       let h = hashes[i] >>> 0;
       if (params.float) {
         const f = Math.sin(simTick * 0.137 + i * drift[i]) * 1e6;
@@ -868,7 +869,7 @@
         st.ctx.fillRect(12, y + laneH / 2 - 1, 4, 2);
         st.ctx.globalAlpha = 1;
         label(st.ctx, c.name, 22, y + laneH / 2, c.color, 11);
-        label(st.ctx, c.lat + ' мс', 38, y + laneH / 2, C.dim, 9);
+        label(st.ctx, c.lat + T('ms_unit_ms'), 38, y + laneH / 2, C.dim, 9);
 
         const x0 = 92;
         cells.forEach((cell, k) => {
@@ -892,7 +893,7 @@
       st.ctx.setLineDash([]);
 
       label(st.ctx, 'tick ' + simTick, 12, 16, C.ink, 10);
-      label(st.ctx, waiting ? 'ждём буфер клиента ' + waiting + ' (' + maxLagNow + ' тик.)' : 'все синхронны', 92, 16, waiting ? C.rose : C.mint, 10);
+      label(st.ctx, waiting ? T('wait_client') + waiting + ' (' + maxLagNow + T('tick_dot') : T('all_sync'), 92, 16, waiting ? C.rose : C.mint, 10);
 
       const f1 = hashes[0].toString(16).padStart(8, '0');
       const f2 = hashes[1].toString(16).padStart(8, '0');
@@ -904,8 +905,8 @@
       setReadout({
         tick: simTick,
         safe: Math.max(0, simTick),
-        hash: desync ? 'расходятся' : 'совпадают',
-        status: desync ? 'desync' : (waiting ? 'ожидание' : 'lockstep')
+        hash: desync ? T('diverge') : T('match'),
+        status: desync ? 'desync' : (waiting ? T('waiting') : 'lockstep')
       });
     });
     handle.reset = reset;
@@ -926,10 +927,10 @@
       { a: 2.4, e: 0.16, color: C.violet, name: 'IV', size: 6.8, M0: 1.2 }
     ];
     let age = 0;
-    const setReadout = readout(st.readout, [['p1', 'периоды'], ['hz', 'зона обитаемости'], ['years', 'эпоха']]);
+    const setReadout = readout(st.readout, [['p1', T('periods')], ['hz', T('habitable')], ['years', T('epoch')]]);
 
-    slider(st.controls, 'масса звезды', 0.4, 2.2, params.mass, 0.05, v => v.toFixed(2) + ' M☉', v => params.mass = v);
-    slider(st.controls, 'скорость', 0, 1, params.speed, 0.02, v => v.toFixed(2) + '×', v => params.speed = v);
+    slider(st.controls, T('star_mass'), 0.4, 2.2, params.mass, 0.05, v => v.toFixed(2) + ' M☉', v => params.mass = v);
+    slider(st.controls, T('speed'), 0, 1, params.speed, 0.02, v => v.toFixed(2) + '×', v => params.speed = v);
 
     function solveKepler(M, e) {
       let E = M;
@@ -1014,8 +1015,8 @@
 
       const periods = planets.map(p => Math.sqrt(p.a ** 3 / params.mass).toFixed(2)).join(' · ');
       setReadout({
-        p1: periods + ' лет',
-        hz: hzIn.toFixed(2) + '–' + hzOut.toFixed(2) + ' а.е.',
+        p1: periods + T('years'),
+        hz: hzIn.toFixed(2) + '–' + hzOut.toFixed(2) + T('au'),
         years: age.toFixed(1)
       });
     });
@@ -1032,7 +1033,7 @@
     const N = 21;
     let grid = [];
     let stats = { fair: '—', conn: '—', res: '0' };
-    const setReadout = readout(st.readout, [['fair', 'баланс'], ['conn', 'связность'], ['res', 'ресурсы']]);
+    const setReadout = readout(st.readout, [['fair', T('balance')], ['conn', T('connectivity')], ['res', T('resources')]]);
 
     function generate() {
       const rnd = mulberry32(params.seed);
@@ -1120,8 +1121,8 @@
       setReadout(stats);
     }
 
-    slider(st.controls, 'уровень воды', 0.2, 0.62, params.sea, 0.01, v => v.toFixed(2), v => { params.sea = v; generate(); });
-    button(st.controls, 'новая карта', () => { params.seed = Math.floor(Math.random() * 9999); generate(); });
+    slider(st.controls, T('water_level'), 0.2, 0.62, params.sea, 0.01, v => v.toFixed(2), v => { params.sea = v; generate(); });
+    button(st.controls, T('new_map'), () => { params.seed = Math.floor(Math.random() * 9999); generate(); });
 
     setTimeout(generate, 0);
 
@@ -1161,7 +1162,7 @@
         st.ctx.fillStyle = '#07080b';
         st.ctx.beginPath(); st.ctx.arc(bx, by, size * 0.2, 0, TAU); st.ctx.fill();
       });
-      label(st.ctx, 'симметрия 180° · старт A / B', 10, 11, C.dim, 9);
+      label(st.ctx, T('symmetry'), 10, 11, C.dim, 9);
       setReadout(stats);
     });
     handle.reset = () => { params.seed = 2026; params.sea = 0.44; generate(); };
@@ -1176,11 +1177,11 @@
     const params = { alpha: 0.9, beta: 0.15, gamma: 0.6, delta: 0.04 };
     let prey = 22, pred = 4.5, K = 160, t = 0;
     let hist = [];
-    const setReadout = readout(st.readout, [['prey', 'жертвы'], ['pred', 'хищники'], ['phase', 'фаза']]);
+    const setReadout = readout(st.readout, [['prey', T('prey')], ['pred', T('predators')], ['phase', T('phase')]]);
 
-    slider(st.controls, 'рождаемость α', 0.5, 1.6, params.alpha, 0.02, v => v.toFixed(2), v => params.alpha = v);
-    slider(st.controls, 'эффективность β', 0.05, 0.35, params.beta, 0.01, v => v.toFixed(2), v => params.beta = v);
-    slider(st.controls, 'смертность γ', 0.3, 1.2, params.gamma, 0.02, v => v.toFixed(2), v => params.gamma = v);
+    slider(st.controls, T('birth'), 0.5, 1.6, params.alpha, 0.02, v => v.toFixed(2), v => params.alpha = v);
+    slider(st.controls, T('efficiency'), 0.05, 0.35, params.beta, 0.01, v => v.toFixed(2), v => params.beta = v);
+    slider(st.controls, T('death'), 0.3, 1.2, params.gamma, 0.02, v => v.toFixed(2), v => params.gamma = v);
 
     function deriv(p, q) {
       return [params.alpha * p * (1 - p / K) - params.beta * p * q,
@@ -1236,12 +1237,12 @@
 
       const lx = st.w - 132;
       st.ctx.fillStyle = C.mint; st.ctx.fillRect(lx, 10, 8, 3);
-      label(st.ctx, 'жертвы', lx + 13, 12, C.dim, 9);
+      label(st.ctx, T('prey'), lx + 13, 12, C.dim, 9);
       st.ctx.fillStyle = C.rose; st.ctx.fillRect(lx + 62, 10, 8, 3);
-      label(st.ctx, 'хищники', lx + 75, 12, C.dim, 9);
+      label(st.ctx, T('predators'), lx + 75, 12, C.dim, 9);
 
-      if (prey < 0.6) label(st.ctx, 'жертвы вымерли', st.w / 2, st.h / 2, C.rose, 12, 'center');
-      if (pred < 0.6) label(st.ctx, 'хищники вымерли', st.w / 2, st.h / 2 + 16, C.rose, 12, 'center');
+      if (prey < 0.6) label(st.ctx, T('prey_extinct'), st.w / 2, st.h / 2, C.rose, 12, 'center');
+      if (pred < 0.6) label(st.ctx, T('predators_extinct'), st.w / 2, st.h / 2 + 16, C.rose, 12, 'center');
 
       setReadout({
         prey: prey.toFixed(1),

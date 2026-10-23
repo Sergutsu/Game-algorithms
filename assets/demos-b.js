@@ -5,6 +5,7 @@
   'use strict';
 
   const DEMOS = (window.GA_DEMOS = window.GA_DEMOS || {});
+  const T = (key) => window.GA_T(key);
   const C = {
     acid: '#c8f751', mint: '#6ee7b7', sky: '#7dd3fc', amber: '#fbbf6b',
     rose: '#fda4af', violet: '#c4b5fd', ink: '#e7eddf', dim: '#6b7368'
@@ -186,7 +187,7 @@
     let spacing = 16;
     let dragIdx = -1;
 
-    const setReadout = readout(st.readout, [['pts', 'частицы'], ['it', 'итерации'], ['wind', 'ветер']]);
+    const setReadout = readout(st.readout, [['pts', T('particles')], ['it', T('iterations')], ['wind', T('wind')]]);
 
     function reset() {
       const top = 26;
@@ -209,13 +210,13 @@
       const idx = (x, y) => y * COLS + x;
       for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
-          // structural: держат форму сетки
+          // structural: they hold the shape of the mesh
           if (x < COLS - 1) cons.push([idx(x, y), idx(x + 1, y), spacing, 1.0]);
           if (y < ROWS - 1) cons.push([idx(x, y), idx(x, y + 1), spacing, 1.0]);
-          // bend: сопротивляются складыванию, но слабо
+          // bend: they resist folding, but only weakly
           if (x < COLS - 2) cons.push([idx(x, y), idx(x + 2, y), spacing * 2, 0.12]);
           if (y < ROWS - 2) cons.push([idx(x, y), idx(x, y + 2), spacing * 2, 0.12]);
-          // shear: очень мягкий, иначе полотно становится жёсткой пластиной
+          // shear: very soft, otherwise the cloth turns into a stiff sheet
           if (x < COLS - 1 && y < ROWS - 1) {
             const d = spacing * Math.SQRT2;
             cons.push([idx(x, y), idx(x + 1, y + 1), d, 0.18]);
@@ -283,9 +284,9 @@
     st.canvas.addEventListener('pointerup', () => { dragIdx = -1; });
     st.canvas.addEventListener('pointercancel', () => { dragIdx = -1; });
 
-    slider(st.controls, 'ветер', -1, 1, params.wind, 0.05, v => v.toFixed(2), v => params.wind = v);
-    slider(st.controls, 'жёсткость', 1, 12, params.stiffness, 1, v => v + ' ит.', v => params.stiffness = v);
-    button(st.controls, 'сбросить', () => reset());
+    slider(st.controls, T('wind'), -1, 1, params.wind, 0.05, v => v.toFixed(2), v => params.wind = v);
+    slider(st.controls, T('stiffness'), 1, 12, params.stiffness, 1, v => v + T('res'), v => params.stiffness = v);
+    button(st.controls, T('reset_btn'), () => reset());
 
     setTimeout(reset, 0);
 
@@ -322,7 +323,7 @@
           st.ctx.beginPath(); st.ctx.arc(p.x, p.y, 2, 0, TAU); st.ctx.fill();
         }
       }
-      label(st.ctx, 'Verlet · ' + params.stiffness + ' итераций', 10, 13, C.dim, 9);
+      label(st.ctx, 'Verlet · ' + params.stiffness + T('iterations_unit'), 10, 13, C.dim, 9);
       setReadout({
         pts: pts.length,
         it: params.stiffness,
@@ -347,7 +348,7 @@
     let trail = [];
     let cooldown = 0;
     let crossings = 0;
-    const setReadout = readout(st.readout, [['cross', 'переходы'], ['speed', 'скорость'], ['state', 'состояние']]);
+    const setReadout = readout(st.readout, [['cross', T('transitions')], ['speed', T('speed')], ['state', T('state')]]);
 
     function reset() {
       ball = { x: st.w * 0.5, y: st.h * 0.24, vx: params.speed * 0.7, vy: params.speed * 0.45 };
@@ -356,8 +357,8 @@
       cooldown = 0;
     }
 
-    slider(st.controls, 'скорость', 60, 280, params.speed, 5, v => v, v => { params.speed = v; });
-    toggle(st.controls, 'поворот 90°', true, v => params.rotate = v);
+    slider(st.controls, T('speed'), 60, 280, params.speed, 5, v => v, v => { params.speed = v; });
+    toggle(st.controls, T('turn90'), true, v => params.rotate = v);
 
     const handle = loop((dt) => {
       clear(st, '#07080b');
@@ -415,7 +416,7 @@
         st.ctx.ellipse(0, 0, rx, ry, 0, 0, TAU);
         st.ctx.stroke();
         st.ctx.restore();
-        label(st.ctx, i === 0 ? 'вход' : 'выход', p.x, p.y + ry + 12, p.color, 9, 'center');
+        label(st.ctx, i === 0 ? T('entrance') : T('exit'), p.x, p.y + ry + 12, p.color, 9, 'center');
       });
 
       // trail
@@ -446,7 +447,7 @@
       setReadout({
         cross: crossings,
         speed: Math.round(Math.hypot(ball.vx, ball.vy)),
-        state: params.rotate ? 'поворот скорости' : 'перенос без поворота'
+        state: params.rotate ? T('vel_turn') : T('translate')
       });
     });
     setTimeout(reset, 0);
@@ -462,7 +463,7 @@
     const params = { r: 3.62 };
     let bmp = null;
     let lastW = 0;
-    const setReadout = readout(st.readout, [['r', 'параметр r'], ['lyap', 'λ Ляпунова'], ['regime', 'режим']]);
+    const setReadout = readout(st.readout, [['r', T('param_r')], ['lyap', T('lyapunov')], ['regime', T('mode')]]);
 
     function buildBifurcation() {
       const w = Math.max(160, Math.round(st.w / 1.5));
@@ -540,9 +541,9 @@
       label(st.ctx, 'xₙ₊₁ = r·xₙ(1−xₙ)', 10, by - 2, C.dim, 9);
 
       const lam = lyapunov(params.r);
-      let regime = 'хаос';
-      if (lam < -0.02) regime = 'устойчивая точка';
-      else if (lam < 0.02) regime = 'периодический цикл';
+      let regime = T('chaos');
+      if (lam < -0.02) regime = T('fixed_point');
+      else if (lam < 0.02) regime = T('periodic');
       setReadout({
         r: params.r.toFixed(3),
         lyap: lam.toFixed(3),
@@ -564,7 +565,7 @@
     let games = 0, winsB = 0;
     let acc = 0;
     const rnd = mulberry32(11);
-    const setReadout = readout(st.readout, [['ra', 'игрок A'], ['rb', 'игрок B'], ['games', 'матчей'], ['rate', 'винрейт B']]);
+    const setReadout = readout(st.readout, [['ra', T('player_a')], ['rb', T('player_b')], ['games', T('matches')], ['rate', T('winrate_b')]]);
 
     function match() {
       const pA = 1 / (1 + Math.pow(10, -params.gap / 400));
@@ -579,9 +580,9 @@
       if (histA.length > 260) { histA.shift(); histB.shift(); }
     }
 
-    slider(st.controls, 'K-фактор', 4, 60, params.k, 1, v => v, v => params.k = v);
-    slider(st.controls, 'истинная разница', -300, 300, params.gap, 10, v => (v > 0 ? '+' : '') + v, v => params.gap = v);
-    button(st.controls, 'сброс', () => {
+    slider(st.controls, T('k_factor'), 4, 60, params.k, 1, v => v, v => params.k = v);
+    slider(st.controls, T('true_diff'), -300, 300, params.gap, 10, v => (v > 0 ? '+' : '') + v, v => params.gap = v);
+    button(st.controls, T('reset_short'), () => {
       ra = 1500; rb = 1500; histA = []; histB = []; games = 0; winsB = 0;
     });
 
@@ -652,7 +653,7 @@
     let forecast = [];
     let band = 0;
 
-    const setReadout = readout(st.readout, [['last', 'прогноз +21 д'], ['mape', 'MAPE'], ['slope', 'тренд']]);
+    const setReadout = readout(st.readout, [['last', T('forecast')], ['mape', 'MAPE'], ['slope', T('trend')]]);
     function build() {
       series = [];
       let v = 1000, e = 0;
@@ -678,8 +679,8 @@
       band = (err / Math.max(1, n)) * 100;
     }
 
-    slider(st.controls, 'шум', 0.1, 2.4, params.noise, 0.05, v => v.toFixed(2), v => { params.noise = v; build(); });
-    slider(st.controls, 'тренд', -0.6, 1.2, params.trend, 0.02, v => v.toFixed(2), v => { params.trend = v; build(); });
+    slider(st.controls, T('noise'), 0.1, 2.4, params.noise, 0.05, v => v.toFixed(2), v => { params.noise = v; build(); });
+    slider(st.controls, T('trend'), -0.6, 1.2, params.trend, 0.02, v => v.toFixed(2), v => { params.trend = v; build(); });
     setTimeout(build, 0);
 
     const handle = loop(() => {
@@ -729,9 +730,9 @@
       const tx = px(series.length - 1);
       st.ctx.strokeStyle = 'rgba(255,255,255,0.2)';
       st.ctx.beginPath(); st.ctx.moveTo(tx, padT); st.ctx.lineTo(tx, padT + plotH); st.ctx.stroke();
-      label(st.ctx, 'сегодня', tx + 4, padT + 6, C.dim, 8);
+      label(st.ctx, T('today'), tx + 4, padT + 6, C.dim, 8);
 
-      label(st.ctx, '+21д', st.w - 12, padT + 6, C.acid, 9, 'right');
+      label(st.ctx, T('plus21'), st.w - 12, padT + 6, C.acid, 9, 'right');
       setReadout({
         last: forecast[forecast.length - 1].toFixed(0),
         mape: band.toFixed(1) + '%',
@@ -751,7 +752,7 @@
     let results = [];
     let stats = { avg: 0, med: 0, p90: 0, rate: 0 };
 
-    const setReadout = readout(st.readout, [['avg', 'среднее'], ['med', 'медиана'], ['p90', 'p90'], ['rate', 'шанс']]);
+    const setReadout = readout(st.readout, [['avg', T('mean')], ['med', T('median')], ['p90', 'p90'], ['rate', T('chance')]]);
 
     function simulate() {
       const rnd = mulberry32(params.pity * 31 + 7);
@@ -778,7 +779,7 @@
     }
 
     slider(st.controls, 'hard pity', 30, 120, params.pity, 1, v => v, v => { params.pity = v; simulate(); });
-    button(st.controls, 'пересимулировать', simulate);
+    button(st.controls, T('resimulate'), simulate);
     setTimeout(simulate, 0);
 
     const handle = loop(() => {
@@ -823,7 +824,7 @@
       const mx = padL + (stats.avg / maxPulls) * plotW;
       st.ctx.strokeStyle = C.acid;
       st.ctx.beginPath(); st.ctx.moveTo(mx, padT); st.ctx.lineTo(mx, st.h - padB); st.ctx.stroke();
-      label(st.ctx, 'среднее', mx + 3, padT + 6, C.acid, 8);
+      label(st.ctx, T('mean'), mx + 3, padT + 6, C.acid, 8);
 
       const px90 = padL + (stats.p90 / maxPulls) * plotW;
       st.ctx.strokeStyle = C.amber;
@@ -832,7 +833,7 @@
       st.ctx.setLineDash([]);
       label(st.ctx, 'p90', px90 + 3, padT + 18, C.amber, 8);
 
-      label(st.ctx, 'попыток до легендарки →', padL + plotW / 2, st.h - 8, C.dim, 8, 'center');
+      label(st.ctx, T('attempts'), padL + plotW / 2, st.h - 8, C.dim, 8, 'center');
       label(st.ctx, '0', padL - 6, st.h - padB, C.dim, 8, 'right');
       label(st.ctx, String(maxPulls), st.w - 10, st.h - padB + 10, C.dim, 8, 'right');
 
@@ -854,7 +855,7 @@
     const st = makeStage(el);
     const params = { iso: 1.6, balls: 4, speed: 1 };
     const balls = [];
-    const setReadout = readout(st.readout, [['cells', 'ячеек'], ['segs', 'сегментов'], ['iso', 'изоуровень']]);
+    const setReadout = readout(st.readout, [['cells', T('cells')], ['segs', T('segments')], ['iso', T('isolevel')]]);
     let t = 0;
 
     function ensureBalls() {
@@ -869,8 +870,8 @@
     }
     ensureBalls();
 
-    slider(st.controls, 'изоуровень', 0.5, 3.2, params.iso, 0.05, v => v.toFixed(2), v => params.iso = v);
-    slider(st.controls, 'шаров', 1, 5, params.balls, 1, v => v, v => params.balls = v);
+    slider(st.controls, T('isolevel'), 0.5, 3.2, params.iso, 0.05, v => v.toFixed(2), v => params.iso = v);
+    slider(st.controls, T('spheres'), 1, 5, params.balls, 1, v => v, v => params.balls = v);
 
     function field(px, py) {
       let f = 0;
@@ -975,12 +976,12 @@
     const values = [42, 68, 81, 56];
     const colors = [C.mint, C.sky, C.acid, C.violet];
     const params = { mode: 'vickrey' };
-    const setReadout = readout(st.readout, [['win', 'победитель'], ['price', 'цена'], ['rev', 'доход'], ['second', 'вторая ставка']]);
+    const setReadout = readout(st.readout, [['win', T('winner')], ['price', T('price')], ['rev', T('revenue')], ['second', T('second_bid')]]);
 
     names.forEach((n, i) => {
-      slider(st.controls, 'цена ' + n, 5, 100, values[i], 1, v => v, v => { values[i] = v; });
+      slider(st.controls, T('price_pad') + n, 5, 100, values[i], 1, v => v, v => { values[i] = v; });
     });
-    select(st.controls, 'формат', [['vickrey', 'Викри (2-я цена)'], ['first', 'первая цена']], v => params.mode = v);
+    select(st.controls, T('format'), [['vickrey', T('vickrey')], ['first', T('first_price')]], v => params.mode = v);
 
     const handle = loop(() => {
       clear(st, '#07080b');
@@ -1024,9 +1025,9 @@
       st.ctx.lineTo(st.w - 8, py);
       st.ctx.stroke();
       st.ctx.setLineDash([]);
-      label(st.ctx, 'цена ' + price.toFixed(0), padL + 4, py - 8, C.rose, 9);
+      label(st.ctx, T('price_pad') + price.toFixed(0), padL + 4, py - 8, C.rose, 9);
 
-      label(st.ctx, params.mode === 'vickrey' ? 'вторая цена' : 'первая цена', st.w - 10, 12, C.dim, 9, 'right');
+      label(st.ctx, params.mode === 'vickrey' ? T('second_price') : T('first_price'), st.w - 10, 12, C.dim, 9, 'right');
 
       setReadout({
         win: names[winner] + ' (' + values[winner] + ')',
