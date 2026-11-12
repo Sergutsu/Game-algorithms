@@ -19,16 +19,23 @@ from topics_4 import TOPICS_4  # noqa: E402
 from topics_5 import TOPICS_5, APPENDIX  # noqa: E402
 from topics_6 import TOPICS_6  # noqa: E402
 from topics_7 import TOPICS_7  # noqa: E402
-from i18n import CATS, CHAPTER_ORDER  # noqa: E402
+from topics_procgen_a import TOPICS_PG_A  # noqa: E402
+from topics_procgen_b import TOPICS_PG_B  # noqa: E402
+from i18n import (  # noqa: E402
+    CATS, CHAPTER_ORDER, PG_GROUP_ORDER, PG_GROUPS, PG_ORDER,
+)
+
+PG_RANK = {tid: i for i, tid in enumerate(PG_ORDER)}
 
 try:
     from appendix_en import APPENDIX_EN  # noqa: E402
 except ImportError:
     APPENDIX_EN = []
 
-RU = TOPICS_1 + TOPICS_2 + TOPICS_3 + TOPICS_4 + TOPICS_5 + TOPICS_6 + TOPICS_7
+RU = (TOPICS_1 + TOPICS_2 + TOPICS_3 + TOPICS_4 + TOPICS_5 + TOPICS_6 +
+      TOPICS_7 + TOPICS_PG_A + TOPICS_PG_B)
 EN = []
-for _i in range(1, 7):
+for _i in range(1, 8):
     try:
         _m = importlib.import_module("topics_en_%d" % _i)
     except ImportError:
@@ -36,6 +43,13 @@ for _i in range(1, 7):
     for _name in dir(_m):
         if _name.startswith("TOPICS_EN_"):
             EN.extend(getattr(_m, _name))
+for _mod, _attr in (("topics_en_procgen_a", "TOPICS_EN_PG_A"),
+                    ("topics_en_procgen_b", "TOPICS_EN_PG_B")):
+    try:
+        _m = importlib.import_module(_mod)
+    except ImportError:
+        continue
+    EN.extend(getattr(_m, _attr, []))
 EN_BY_ID = {t["id"]: t for t in EN}
 
 SITE = "https://sergutsu.github.io/Game-algorithms/"
@@ -57,10 +71,13 @@ def en_topic(topic):
 
 
 def topic_list(topics, lang):
-    """Список тем по разделам (в порядке CHAPTER_ORDER)."""
+    """Список тем по разделам: Part I — системы, Part II — процедурная генерация."""
     lines = []
     for cat in CHAPTER_ORDER:
-        items = sorted([t for t in topics if cat_of(t) == cat], key=lambda t: t["n"])
+        items = [t for t in topics if cat_of(t) == cat]
+        if cat == "procgen":
+            continue
+        items.sort(key=lambda t: t["n"])
         if not items:
             continue
         name = CATS[cat]["ru"][0] if lang == "ru" else CATS[cat]["en"][0]
@@ -68,13 +85,34 @@ def topic_list(topics, lang):
         lines.append("### %s" % name)
         lines.append("")
         for t in items:
-            title = t["title"] if lang == "ru" else t["title"]
             tags = ", ".join(t.get("tags") or [])
-            extra = ""
-            if t.get("demo"):
-                extra = " · 🎮 demo"
-            lines.append("%d. **%s**  " % (t["n"], title))
+            extra = " · 🎮 demo" if t.get("demo") else ""
+            lines.append("%d. **%s**  " % (t["n"], t["title"]))
             lines.append("   *(%s)*%s" % (tags, extra))
+
+    part = [t for t in topics if cat_of(t) == "procgen"]
+    if part:
+        lines.append("")
+        lines.append("## Часть II — процедурная генерация / Part II — procedural generation")
+        lines.append("")
+        lines.append("> Отдельная часть исследования: полный атлас алгоритмов генерации контента.  ")
+        lines.append("> A separate part of the research: the full atlas of content generation.")
+        num = 0
+        for gkey in PG_GROUP_ORDER:
+            gitems = [t for t in part if t.get("pg", "foundation") == gkey]
+            if not gitems:
+                continue
+            gitems.sort(key=lambda t: PG_RANK.get(t["id"], 9999))
+            gname = PG_GROUPS[gkey][lang][0]
+            lines.append("")
+            lines.append("### %s" % gname)
+            lines.append("")
+            for t in gitems:
+                num += 1
+                tags = ", ".join(t.get("tags") or [])
+                extra = " · 🎮 demo" if t.get("demo") else ""
+                lines.append("PG-%02d. **%s**  " % (num, t["title"]))
+                lines.append("   *(%s)*%s" % (tags, extra))
     return "\n".join(lines)
 
 
@@ -101,6 +139,11 @@ def main():
     ru_tasks = tasks_list(APPENDIX, "ru")
     en_tasks = tasks_list(APPENDIX_EN or APPENDIX, "en")
 
+    pg_topics = [t for t in RU if cat_of(t) == "procgen"]
+    pg_n = len(pg_topics)
+    pg_d = len({t.get("demo") for t in pg_topics if t.get("demo")})
+    pg_max = "PG-%02d" % len(PG_ORDER)
+
     doc = f"""# Game-algorithms
 
 <!-- Файл генерируется: python3 tools/gen_readme.py -->
@@ -109,8 +152,12 @@ def main():
 > Один автономный HTML-файл (открывается двойным кликом, работает офлайн):
 > **{len(RU)} тем** с математической моделью, пошаговой реализацией, рабочим кодом,
 > сложностью, типичными ошибками и референсами; **{demos} интерактивных демо**
-> (баллистика, boids, lockstep, GPU-частицы, бюджет кадра, отсечение, батчинг…);
+> (шум и эрозия, пещеры и подземелья, BSP, лабиринты, WFC, биомы, реки, города,
+> предметы, имена, квесты, музыка, фасады, а также баллистика, boids и lockstep);
 > **{tasks} практических задач** и словарь терминов.
+>
+> **Часть II — процедурная генерация** вынесена в отдельный атлас: {pg_n} тем,
+> {pg_d} живых моделей, четыре слоя — от шума и сэмплинга до контента и драматургии.
 > Поиск, фильтры по сложности, прогресс чтения, тёмная/светлая темы и переключатель
 > языка — внутри.
 >
@@ -120,6 +167,8 @@ def main():
 > The same research in English: **{len(RU)} topics** with the mathematical model, a
 > step-by-step build, working code, complexity, pitfalls and references;
 > **{demos} interactive demos**; **{tasks} practical tasks** and a glossary.
+> **Part II — procedural generation** is a separate atlas: {pg_n} topics, {pg_d} live
+> models, four layers from noise and sampling up to content and drama.
 > A language switch sits in the header and remembers your choice.
 
 **Онлайн / Live:** <{SITE}> — GitHub Pages, корень репозитория, ветка `main`
@@ -144,8 +193,11 @@ python3 tools/gen_readme.py   # обновить этот README
 | `index.html` | Русская версия — точка входа GitHub Pages |
 | `index.en.html` | Английская версия |
 | `game-algorithms-research.html` | Копия русской версии (старые ссылки работают) |
-| `research/topics_*.py` | Темы RU (1–30, 31–36 оптимизация, 37–57, 58–66 heavy/GPU) |
-| `research/topics_en_*.py` | Темы EN (те же id, английский текст) |
+| `research/topics_*.py` | Часть I, темы RU (1–30, 31–36 оптимизация, 37–57, 58–66 heavy/GPU) |
+| `research/topics_procgen_a.py` | Часть II, слои 01–02: шум, сэмплинг, планировка (RU) |
+| `research/topics_procgen_b.py` | Часть II, слои 03–04: миры, контент, системы (RU) |
+| `research/topics_en_*.py` | Часть I, темы EN (те же id, английский текст) |
+| `research/topics_en_procgen_*.py` | Часть II на английском |
 | `research/appendix_en.py` | 45 практических задач на английском |
 | `research/codes_en.py` | Английские комментарии в примерах кода |
 | `research/i18n.py` | Разделы, подписи интерфейса, словарь, строки оболочки (RU + EN) |
@@ -155,6 +207,9 @@ python3 tools/gen_readme.py   # обновить этот README
 ---
 
 ## 📚 Темы — русская версия
+
+Сначала **Часть I — системы**, затем отдельная **Часть II — атлас процедурной
+генерации** (нумерация PG-01…{pg_max}).
 {ru_topics}
 
 ---

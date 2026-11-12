@@ -287,7 +287,7 @@ def scatter(v, spread_deg=2.0, rng=random):
         games=["Rainbow Six Siege", "Sniper Elite", "Wanted: Dead", "Half-Life 2"],
     ),
     dict(
-        n=47, id="voxels", cat="geometry", level=3,
+        n=47, id="voxels", cat="procgen", pg="world", level=3,
         title="Генерация воксельных миров",
         en="Voxel worlds and marching cubes",
         tags=["marching cubes", "SDF", "октодерево"],
@@ -334,7 +334,7 @@ def marching_edge(p1, p2, f1, f2):
         demo="voxel",
     ),
     dict(
-        n=48, id="textures", cat="graphics", level=2,
+        n=48, id="textures", cat="procgen", pg="foundation", level=2,
         title="Процедурные текстуры материалов",
         en="Procedural textures (noise, FFT, weathering)",
         tags=["шум", "преобразования Фурье", "tiling"],
@@ -388,6 +388,7 @@ vec3 normalFromHeight(float h, vec2 uv, float strength) {
             "Процедурный normal без нормировки даёт артефакты освещения.",
         ],
         games=["Substance Designer workflows", "No Man's Sky", "Elite Dangerous", "Dreams (PS4)"],
+        demo="materials",
     ),
     dict(
         n=49, id="distortion", cat="graphics", level=3,

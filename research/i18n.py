@@ -41,9 +41,11 @@ CATS = {
     "procgen": {
         "color": "#6ee7b7",
         "ru": ("Процедурная генерация",
-               "Планетные системы, сбалансированные карты, экосистемы и музыка."),
+               "Шум, пещеры, подземелья, рельеф, биомы, города, предметы, имена, "
+               "квесты и музыка — полный атлас алгоритмов."),
         "en": ("Procedural generation",
-               "Planetary systems, balanced maps, ecosystems and music."),
+               "Noise, caves, dungeons, terrain, biomes, cities, items, names, "
+               "quests and music — the complete algorithm atlas."),
     },
     "physics": {
         "color": "#a5b4fc",
@@ -117,10 +119,145 @@ CATS = {
     },
 }
 
-# порядок разделов в документе
+# порядок разделов в документе.
+# "procgen" намеренно стоит последним: это отдельная часть исследования
+# (Part II), а не ещё одна глава среди систем.
 CHAPTER_ORDER = [
-    "mechanics", "ai", "gfx", "network", "procgen", "physics", "optimize",
+    "mechanics", "ai", "gfx", "network", "physics", "optimize",
     "math", "stats", "geometry", "shaders", "economy", "audio", "ml", "heavy",
+    "procgen",
+]
+
+# --------------------------------------------------------------------------
+# отдельная часть: процедурная генерация
+# --------------------------------------------------------------------------
+PART_OF = {"procgen": "procgen"}
+
+PARTS = {
+    "procgen": {
+        "kicker": {"ru": "Часть II · атлас алгоритмов", "en": "Part II · algorithm atlas"},
+        "title": {"ru": "Процедурная генерация", "en": "Procedural generation"},
+        "subtitle": {
+            "ru": "Всё, что игра придумывает сама",
+            "en": "Everything the game invents by itself",
+        },
+        "lede": {
+            "ru": ("Здесь собрано всё знание о генерации контента: шум и поля, "
+                   "сэмплирование и детерминизм, пещеры и подземелья, лабиринты, WFC, "
+                   "рельеф и эрозия, биомы, реки, планеты, воксели, города, растения, "
+                   "фасады и shape-грамматики, предметы, имена, квесты, музыка и "
+                   "AI-директор. Каждая тема — "
+                   "модель, формула, пошаговая сборка, рабочий код и живая модель "
+                   "в браузере. Темы сгруппированы в четыре слоя: от фундамента "
+                   "до контента и драматургии."),
+            "en": ("All the knowledge about content generation in one place: noise and "
+                   "fields, sampling and determinism, caves and dungeons, mazes, WFC, "
+                   "terrain and erosion, biomes, rivers, planets, voxels, cities, "
+                   "plants, facades and shape grammars, items, names, quests, music "
+                   "and the AI director. Every "
+                   "topic ships a model, a formula, a step-by-step build, working code "
+                   "and a live in-browser model. Topics are grouped into four layers, "
+                   "from the foundation up to content and drama."),
+        },
+        "note": {
+            "ru": ("Все остальные разделы — «Часть I: системы». Процедурная генерация "
+                   "выделена отдельно, потому что это не одна механика, а сквозная "
+                   "дисциплина: одни и те же приёмы дают рельеф, лут, уровни и музыку."),
+            "en": ("All other sections form “Part I: systems”. Procedural generation is "
+                   "kept apart because it is not a single mechanic but a cross-cutting "
+                   "discipline: the same techniques produce terrain, loot, levels and music."),
+        },
+    },
+}
+
+# группы внутри части (порядок важен)
+PG_GROUP_ORDER = ["foundation", "layout", "world", "content"]
+
+# порядок тем внутри части: от фундамента к контенту.
+# Он же задаёт номера PG-01…PG-27 на странице.
+PG_ORDER = [
+    # foundation
+    "noise", "worley", "poisson", "seeds", "diamondsquare", "textures",
+    # layout
+    "caves", "bsp", "randomwalk", "maze", "wfc", "city", "maps",
+    # world
+    "terrain", "erosion", "biomes", "rivers", "clouds", "planets", "voxels",
+    # content
+    "lsystem", "shapegrammar", "items", "names", "quests", "music", "ecosystem", "director",
+]
+
+PG_GROUPS = {
+    "foundation": {
+        "color": "#6ee7b7",
+        "num": "01",
+        "ru": ("Шум, поля и выборки",
+               "Градиентный и клеточный шум, фракталы, blue noise, детерминированные "
+               "хэши и процедурные материалы. Фундамент, на котором стоят остальные алгоритмы."),
+        "en": ("Noise, fields and sampling",
+               "Gradient and cellular noise, fractals, blue noise, deterministic hashes "
+               "and procedural materials. The foundation every other algorithm stands on."),
+    },
+    "layout": {
+        "color": "#7dd3fc",
+        "num": "02",
+        "ru": ("Планировка: пещеры, подземелья, карты",
+               "Клеточные автоматы, BSP, пьяная прогулка, лабиринты, Wave Function Collapse "
+               "и дорожные сети: как из пустоты получить проходимое пространство."),
+        "en": ("Layout: caves, dungeons, maps",
+               "Cellular automata, BSP, drunkard's walk, mazes, Wave Function Collapse "
+               "and road networks: turning emptiness into traversable space."),
+    },
+    "world": {
+        "color": "#fbbf6b",
+        "num": "03",
+        "ru": ("Миры и рельеф",
+               "Высоты и эрозия, биомы и реки, планеты, воксели и объёмные облака — "
+               "от карты высот до целой солнечной системы."),
+        "en": ("Worlds and terrain",
+               "Heights and erosion, biomes and rivers, planets, voxels and volumetric "
+               "clouds — from a heightmap to a whole solar system."),
+    },
+    "content": {
+        "color": "#c4b5fd",
+        "num": "04",
+        "ru": ("Контент и системы",
+               "L-системы и shape-грамматики, фасады и интерьеры, предметы и аффиксы, "
+               "имена и языки, квесты и миссионные графы, музыка, экосистемы и AI-директор."),
+        "en": ("Content and systems",
+               "L-systems and shape grammars, facades and interiors, items and affixes, "
+               "names and languages, quests and mission graphs, music, ecosystems and "
+               "the AI director."),
+    },
+}
+
+# «что нужно сгенерировать → чем»
+PG_DECISIONS = [
+    {"ru": ("Органичный рельеф, острова, горы", "fBm-шум, domain warping, diamond-square, эрозия"),
+     "en": ("Organic terrain, islands, mountains", "fBm noise, domain warping, diamond-square, erosion")},
+    {"ru": ("Пещеры и каверны", "клеточные автоматы, marching cubes, шум Ворли"),
+     "en": ("Caves and caverns", "cellular automata, marching cubes, Worley noise")},
+    {"ru": ("Подземелье с комнатами и коридорами", "BSP, граф комнат, WFC, шаблоны"),
+     "en": ("A dungeon with rooms and corridors", "BSP, room graph, WFC, hand-made templates")},
+    {"ru": ("Лабиринт", "recursive backtracker, Прим, Крускал, Уилсон"),
+     "en": ("A maze", "recursive backtracker, Prim, Kruskal, Wilson")},
+    {"ru": ("Карта с регионами и фракциями", "Вороной + Ллойд, граф-разбиение, MST, симметрия"),
+     "en": ("A map with regions and factions", "Voronoi + Lloyd, graph partition, MST, symmetry")},
+    {"ru": ("Равномерно разбросанные объекты", "Пуассон-диск (Бридсон), blue noise, jittered grid"),
+     "en": ("Evenly scattered objects", "Poisson disk (Bridson), blue noise, jittered grid")},
+    {"ru": ("Город и сеть дорог", "Пуассон + MST, A* по сетке, L-системы, Вороной"),
+     "en": ("A city and its road network", "Poisson + MST, grid A*, L-systems, Voronoi")},
+    {"ru": ("Фасады, дома и интерьеры", "shape-грамматика, split-правила, WFC, L-системы"),
+     "en": ("Facades, buildings and interiors", "shape grammar, split rules, WFC, L-systems")},
+    {"ru": ("Сбалансированные предметы и лут", "бюджет редкости, аффиксы, PRD, таблицы наград"),
+     "en": ("Balanced items and loot", "rarity budget, affixes, PRD, reward tables")},
+    {"ru": ("Имена, языки, топонимы", "слоговая грамматика, цепи Маркова, шаблоны"),
+     "en": ("Names, languages, toponyms", "syllable grammar, Markov chains, templates")},
+    {"ru": ("Сюжет, миссии, ключи и двери", "миссионный граф, lock-and-key, грамматики"),
+     "en": ("Plot, missions, keys and doors", "mission graph, lock-and-key, grammars")},
+    {"ru": ("Музыка и ритм", "цепи Маркова, L-системы, клеточные автоматы, генеративная гармония"),
+     "en": ("Music and rhythm", "Markov chains, L-systems, cellular automata, generative harmony")},
+    {"ru": ("Всё должно воспроизводиться", "seeded PRNG, hash(seed, coord), фиксированный порядок обхода"),
+     "en": ("Everything must reproduce", "seeded PRNG, hash(seed, coord), fixed iteration order")},
 ]
 
 # --------------------------------------------------------------------------
@@ -230,6 +367,100 @@ DEMO_TITLES = {
     "drawcalls": {
         "ru": "Batching: из тысячи вызовов в десяток",
         "en": "Batching: from a thousand calls to ten",
+    },
+
+    # ---------- часть II: процедурная генерация ----------
+    "noise": {
+        "ru": "Градиентный шум: value, Perlin, simplex и октавы",
+        "en": "Gradient noise: value, Perlin, simplex and octaves",
+    },
+    "worley": {
+        "ru": "Клеточный шум Ворли: F1, F2 и границы ячеек",
+        "en": "Worley cellular noise: F1, F2 and cell borders",
+    },
+    "poisson": {
+        "ru": "Пуассон-диск: Бридсон против белого шума",
+        "en": "Poisson disk: Bridson versus white noise",
+    },
+    "pcg": {
+        "ru": "Хэш и сид: воспроизводимость и лавинный эффект",
+        "en": "Hash and seed: reproducibility and avalanche",
+    },
+    "materials": {
+        "ru": "Процедурный материал: кирпич, дерево, металл",
+        "en": "Procedural material: brick, wood, metal",
+    },
+    "diamondsquare": {
+        "ru": "Diamond-square: шероховатость и высоты",
+        "en": "Diamond-square: roughness and heights",
+    },
+    "caves": {
+        "ru": "Клеточные автоматы: пещера за пять шагов",
+        "en": "Cellular automata: a cave in five steps",
+    },
+    "bsp": {
+        "ru": "BSP-подземелье: разбиение, комнаты, коридоры",
+        "en": "BSP dungeon: splits, rooms, corridors",
+    },
+    "randomwalk": {
+        "ru": "Пьяная прогулка: сколько шагов нужно пещере",
+        "en": "Drunkard's walk: how many steps a cave needs",
+    },
+    "maze": {
+        "ru": "Лабиринт: backtracker, Прим, Крускал, Уилсон",
+        "en": "Maze: backtracker, Prim, Kruskal, Wilson",
+    },
+    "wfc": {
+        "ru": "Wave Function Collapse: энтропия и откат",
+        "en": "Wave Function Collapse: entropy and backtracking",
+    },
+    "city": {
+        "ru": "Город: Вороной, MST-дороги и кварталы",
+        "en": "City: Voronoi, MST roads and blocks",
+    },
+    "erosion": {
+        "ru": "Гидравлическая эрозия: капли, наносы, дельты",
+        "en": "Hydraulic erosion: droplets, sediment, deltas",
+    },
+    "biomes": {
+        "ru": "Биомы: диаграмма Уиттекера и карта мира",
+        "en": "Biomes: Whittaker diagram and the world map",
+    },
+    "rivers": {
+        "ru": "Реки: сток, водосборы и русла",
+        "en": "Rivers: flow, watersheds and channels",
+    },
+    "lsystem": {
+        "ru": "L-система: дерево, папоротник, кривая Гильберта",
+        "en": "L-system: a tree, a fern, the Hilbert curve",
+    },
+    "items": {
+        "ru": "Генератор предметов: редкость, аффиксы, бюджет",
+        "en": "Item generator: rarity, affixes, budget",
+    },
+    "names": {
+        "ru": "Генератор имён: слоги и цепь Маркова",
+        "en": "Name generator: syllables and a Markov chain",
+    },
+    "quests": {
+        "ru": "Миссионный граф: ключи, двери и ветвление",
+        "en": "Mission graph: keys, doors and branching",
+    },
+    "clouds": {
+        "ru": "Объёмные облака: два слоя fBm с domain warping",
+        "en": "Volumetric clouds: two fBm layers with domain warping",
+    },
+    "shapegrammar": {
+        "ru": "Shape-грамматика: фасад из правил разбиения",
+        "en": "Shape grammar: a facade built from split rules",
+    },
+    "musicgen": {
+        "ru": "Генеративная музыка: цепь Маркова и пентатоника",
+        "en": "Generative music: Markov chain and pentatonic",
+    },
+    "director": {
+        "ru": "AI-директор: кривая напряжения и волны врагов",
+        "en": "AI director: tension curve and enemy waves",
     },
 }
 
@@ -343,22 +574,29 @@ STRINGS = {
     "hero_title_2": {"ru": "сделаны ", "en": "the games "},
     "hero_title_emph": {"ru": "игры", "en": "you play"},
     "hero_lede": {
-        "ru": ("{n} темы — от баллистики и boids до глобального освещения, lockstep и апскейлинга. "
+        "ru": ("{n} тем — от баллистики и boids до глобального освещения, lockstep и апскейлинга. "
                "Для каждой: математическая модель, пошаговая реализация, рабочий код, честная сложность, "
-               "типичные ошибки и живая интерактивная модель в браузере."),
+               "типичные ошибки и живая интерактивная модель в браузере. "
+               "Часть II — отдельный атлас процедурной генерации: шум, пещеры, WFC, рельеф, биомы, "
+               "города, фасады, лут и музыка."),
         "en": ("{n} topics — from ballistics and boids to global illumination, lockstep and upscaling. "
                "Each one: the mathematical model, a step-by-step implementation, working code, honest "
-               "complexity, the usual mistakes and a live interactive model in the browser."),
+               "complexity, the usual mistakes and a live interactive model in the browser. "
+               "Part II is a separate atlas of procedural generation: noise, caves, WFC, terrain, "
+               "biomes, cities, facades, loot and music."),
     },
     "hero_start": {"ru": "Начать изучение", "en": "Start reading"},
+    "hero_procgen": {"ru": "Атлас генерации", "en": "Generation atlas"},
     "hero_tasks": {"ru": "{n} практических задач", "en": "{n} practical tasks"},
     "stat_topics": {"ru": "тем · {n} разделов", "en": "topics · {n} sections"},
     "stat_demos": {"ru": "интерактивных демо", "en": "interactive demos"},
     "stat_tasks": {"ru": "практических задач", "en": "practical tasks"},
     "stat_deps": {"ru": "внешних зависимостей", "en": "external dependencies"},
     "meta_desc": {
-        "ru": "Алгоритмы игр: {n} тем с математикой, кодом, сложностью и интерактивными демо.",
-        "en": "Game algorithms: {n} topics with maths, code, complexity and interactive demos.",
+        "ru": ("Алгоритмы игр: {n} тем с математикой, кодом, сложностью и интерактивными демо; "
+               "Часть II — отдельный атлас процедурной генерации: от шума до фасадов и квестов."),
+        "en": ("Game algorithms: {n} topics with maths, code, complexity and interactive demos; "
+               "Part II is a separate atlas of procedural generation, from noise to facades and quests."),
     },
     "level_of": {"ru": "уровень {n} из 3", "en": "level {n} of 3"},
     "side_content": {"ru": "Содержание", "en": "Contents"},
@@ -373,6 +611,30 @@ STRINGS = {
     "level_filter_aria": {"ru": "Фильтр по сложности", "en": "Filter by difficulty"},
     "progress": {"ru": "Прогресс", "en": "Progress"},
     "sections": {"ru": "Разделы", "en": "Sections"},
+    "nav_procgen": {"ru": "Процедурная генерация", "en": "Procedural generation"},
+    "nav_procgen_short": {"ru": "Генерация", "en": "Generation"},
+    "part_label": {"ru": "часть {i}", "en": "part {i}"},
+    "part_topics": {"ru": "{n} тем · {g} слоя", "en": "{n} topics · {g} layers"},
+    "part_atlas_title": {"ru": "Атлас алгоритмов", "en": "Algorithm atlas"},
+    "part_atlas_hint": {"ru": "все темы части одним взглядом", "en": "every topic of the part at a glance"},
+    "part_guide_title": {"ru": "Что генерируем → чем", "en": "What you generate → with what"},
+    "part_guide_hint": {"ru": "быстрый выбор алгоритма", "en": "a quick algorithm chooser"},
+    "part_guide_note": {
+        "ru": ("Таблица — не догма, а отправная точка: почти всегда решение складывается "
+               "из двух-трёх приёмов (например, шум + эрозия + биомы)."),
+        "en": ("The table is a starting point, not a law: almost always the answer combines "
+               "two or three techniques (noise + erosion + biomes, for instance)."),
+    },
+    "part_group_topics": {"ru": "{n} тем", "en": "{n} topics"},
+    "part_back": {"ru": "Часть II · Процедурная генерация", "en": "Part II · Procedural generation"},
+    "part_card_kicker": {"ru": "отдельная часть", "en": "a separate part"},
+    "part_stat_topics": {"ru": "тем", "en": "topics"},
+    "part_stat_demos": {"ru": "интерактивных демо", "en": "interactive demos"},
+    "part_stat_layers": {"ru": "слоя", "en": "layers"},
+    "part_stat_guide": {"ru": "сценариев выбора", "en": "algorithm recipes"},
+    "part_minutes": {"ru": "{n} интерактивных моделей", "en": "{n} interactive models"},
+    "part_filter": {"ru": "Слой", "en": "Layer"},
+    "topic_part_of": {"ru": "{n} / {total} · часть II", "en": "{n} / {total} · part II"},
     "side_foot": {
         "ru": ("Документ работает офлайн: все стили, скрипты и демо встроены в один файл. "
                "Прогресс и тема хранятся локально в браузере."),
