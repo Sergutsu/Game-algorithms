@@ -101,6 +101,7 @@
   const tocLinks = $$('.toc-list a');
   const appxCards = $$('.appx-card');
   const chapterBlocks = $$('.chapter-block');
+  const pgLayers = $$('.pg-layer');
   const appxSections = $$('.appx-section');
   const state = { q: '', cat: 'all', level: 'all' };
   const norm = (s) => (s || '').toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ');
@@ -136,6 +137,10 @@
     chapterBlocks.forEach((block) => {
       const any = $$('.topic', block).some((t) => !t.classList.contains('is-hidden'));
       block.style.display = any ? '' : 'none';
+    });
+    pgLayers.forEach((layer) => {
+      const any = $$('.topic', layer).some((t) => !t.classList.contains('is-hidden'));
+      layer.style.display = any ? '' : 'none';
     });
     appxCards.forEach((c) => {
       const ok = !state.q || norm(c.dataset.search).includes(state.q);

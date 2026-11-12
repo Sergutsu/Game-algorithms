@@ -47,7 +47,7 @@ vec3 gerstner(vec2 p, vec2 dir, float steepness, float wavelength,
         demo="waves",
     ),
     dict(
-        n=15, id="clouds", cat="graphics", level=3,
+        n=15, id="clouds", cat="procgen", pg="world", level=3,
         title="Генерация объёмных облаков",
         en="Volumetric clouds and ray marching",
         tags=["ray marching", "функции плотности", "Beer–Lambert"],
@@ -102,6 +102,7 @@ vec4 marchClouds(vec3 ro, vec3 rd, float dither, float maxDist) {
             "Без высотного градиента облака выглядят как равномерная вата до горизонта.",
         ],
         games=["Red Dead Redemption 2", "Flight Simulator", "Horizon Forbidden West", "UE5 Volumetrics"],
+        demo="clouds",
     ),
     dict(
         n=16, id="prediction", cat="network", level=2,
@@ -314,7 +315,7 @@ def entropy(counts, total):
         games=["Quake III (delta snapshots)", "Overwatch", "Planetside 2", "EVE Online"],
     ),
     dict(
-        n=20, id="planets", cat="procgen", level=2,
+        n=20, id="planets", cat="procgen", pg="world", level=2,
         title="Создание уникальных планетарных систем",
         en="Procedural planetary systems",
         tags=["законы Кеплера", "n-body", "зоны обитаемости"],
@@ -366,7 +367,7 @@ def equilibrium_temp(luminosity_solar, a_au, albedo=0.3):
         demo="planets",
     ),
     dict(
-        n=21, id="maps", cat="procgen", level=3,
+        n=21, id="maps", cat="procgen", pg="layout", level=3,
         title="Генерация сбалансированных карт для стратегий",
         en="Balanced strategy map generation",
         tags=["теория графов", "симметрия", "фэйрнесс"],
@@ -418,7 +419,7 @@ def fairness(graph, starts, resources):
         demo="maps",
     ),
     dict(
-        n=22, id="ecosystem", cat="procgen", level=3,
+        n=22, id="ecosystem", cat="procgen", pg="content", level=3,
         title="Построение правдоподобных экосистем",
         en="Lotka–Volterra ecosystems",
         tags=["Лотка–Вольтерра", "динамические системы", "трофические сети"],
@@ -462,7 +463,7 @@ for _ in range(400):
         demo="ecosystem",
     ),
     dict(
-        n=23, id="music", cat="procgen", level=2,
+        n=23, id="music", cat="procgen", pg="content", level=2,
         title="Процедурные музыкальные композиции",
         en="Procedural music with L-systems",
         tags=["L-системы", "теория музыки", "марковские цепи"],
@@ -516,5 +517,6 @@ def melody(progression, steps=16, rng=random):
             "Громкие стингеры поверх диалога ломают микширование — используйте ducking.",
         ],
         games=["No Man's Sky", "Spore", "The Sims", "Proteus"],
+        demo="musicgen",
     ),
 ]

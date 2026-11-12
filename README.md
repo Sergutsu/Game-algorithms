@@ -4,19 +4,25 @@
 
 > ### 📘 Полное исследование: [game-algorithms-research.html](game-algorithms-research.html)
 > Один автономный HTML-файл (открывается двойным кликом, работает офлайн):
-> **66 тем** с математической моделью, пошаговой реализацией, рабочим кодом,
-> сложностью, типичными ошибками и референсами; **20 интерактивных демо**
-> (баллистика, boids, lockstep, GPU-частицы, бюджет кадра, отсечение, батчинг…);
+> **86 тем** с математической моделью, пошаговой реализацией, рабочим кодом,
+> сложностью, типичными ошибками и референсами; **43 интерактивных демо**
+> (шум и эрозия, пещеры и подземелья, BSP, лабиринты, WFC, биомы, реки, города,
+> предметы, имена, квесты, музыка, фасады, а также баллистика, boids и lockstep);
 > **45 практических задач** и словарь терминов.
+>
+> **Часть II — процедурная генерация** вынесена в отдельный атлас: 28 тем,
+> 28 живых моделей, четыре слоя — от шума и сэмплинга до контента и драматургии.
 > Поиск, фильтры по сложности, прогресс чтения, тёмная/светлая темы и переключатель
 > языка — внутри.
 >
 > Исходники контента — `research/`, сборка — `python3 tools/build.py`, стили и демо — `assets/`.
 
 > ### 📗 Full research (English): [index.en.html](index.en.html)
-> The same research in English: **66 topics** with the mathematical model, a
+> The same research in English: **86 topics** with the mathematical model, a
 > step-by-step build, working code, complexity, pitfalls and references;
-> **20 interactive demos**; **45 practical tasks** and a glossary.
+> **43 interactive demos**; **45 practical tasks** and a glossary.
+> **Part II — procedural generation** is a separate atlas: 28 topics, 28 live
+> models, four layers from noise and sampling up to content and drama.
 > A language switch sits in the header and remembers your choice.
 
 **Онлайн / Live:** <https://sergutsu.github.io/Game-algorithms/> — GitHub Pages, корень репозитория, ветка `main`
@@ -41,17 +47,23 @@ python3 tools/gen_readme.py   # обновить этот README
 | `index.html` | Русская версия — точка входа GitHub Pages |
 | `index.en.html` | Английская версия |
 | `game-algorithms-research.html` | Копия русской версии (старые ссылки работают) |
-| `research/topics_*.py` | Темы RU (1–30, 31–36 оптимизация, 37–57, 58–66 heavy/GPU) |
-| `research/topics_en_*.py` | Темы EN (те же id, английский текст) |
+| `research/topics_*.py` | Часть I, темы RU (1–30, 31–36 оптимизация, 37–57, 58–66 heavy/GPU) |
+| `research/topics_procgen_a.py` | Часть II, слои 01–02: шум, сэмплинг, планировка (RU) |
+| `research/topics_procgen_b.py` | Часть II, слои 03–04: миры, контент, системы (RU) |
+| `research/topics_en_*.py` | Часть I, темы EN (те же id, английский текст) |
+| `research/topics_en_procgen_*.py` | Часть II на английском |
 | `research/appendix_en.py` | 45 практических задач на английском |
 | `research/codes_en.py` | Английские комментарии в примерах кода |
 | `research/i18n.py` | Разделы, подписи интерфейса, словарь, строки оболочки (RU + EN) |
 | `tools/build.py` | Сборщик: `research/*.py` + `assets/` → два HTML |
-| `assets/` | Стили, клиентская логика, 20 демо, таблицы подписей |
+| `assets/` | Стили, клиентская логика, 43 демо, таблицы подписей |
 
 ---
 
 ## 📚 Темы — русская версия
+
+Сначала **Часть I — системы**, затем отдельная **Часть II — атлас процедурной
+генерации** (нумерация PG-01…PG-28).
 
 ### Геймплейные механики
 
@@ -89,17 +101,6 @@ python3 tools/gen_readme.py   # обновить этот README
    *(fixed-point, детерминизм, lockstep)* · 🎮 demo
 19. **Оптимизация передачи состояния мира**  
    *(энтропия Шеннона, квантование, дельта)*
-
-### Процедурная генерация
-
-20. **Создание уникальных планетарных систем**  
-   *(законы Кеплера, n-body, зоны обитаемости)* · 🎮 demo
-21. **Генерация сбалансированных карт для стратегий**  
-   *(теория графов, симметрия, фэйрнесс)* · 🎮 demo
-22. **Построение правдоподобных экосистем**  
-   *(Лотка–Вольтерра, динамические системы, трофические сети)* · 🎮 demo
-23. **Процедурные музыкальные композиции**  
-   *(L-системы, теория музыки, марковские цепи)*
 
 ### Физические симуляции
 
@@ -161,8 +162,6 @@ python3 tools/gen_readme.py   # обновить этот README
    *(BSP, PVS, occlusion culling)*
 46. **Расчёт траекторий рикошетов**  
    *(отражение, закон Снелла, случайность)*
-47. **Генерация воксельных миров**  
-   *(marching cubes, SDF, октодерево)* · 🎮 demo
 
 ### Игровые экономики
 
@@ -207,6 +206,79 @@ python3 tools/gen_readme.py   # обновить этот README
    *(timestamp query, GPU counter, RenderDoc, occlusion query, pipeline statistics)*
 66. **Масштабирование качества и деградация на слабом железе**  
    *(scalability, dynamic resolution, LOD bias, fallback, tier)*
+
+## Часть II — процедурная генерация / Part II — procedural generation
+
+> Отдельная часть исследования: полный атлас алгоритмов генерации контента.  
+> A separate part of the research: the full atlas of content generation.
+
+### Шум, поля и выборки
+
+PG-01. **Градиентный шум: value, Perlin и simplex**  
+   *(value noise, Perlin, simplex, fBm)* · 🎮 demo
+PG-02. **Клеточный шум Ворли: F1, F2 и границы**  
+   *(Вороной, клеточный шум, F2−F1, фича-точки)* · 🎮 demo
+PG-03. **Пуассон-диск и blue noise: равномерный разброс без комков**  
+   *(Бридсон, blue noise, spatial hash, скаттеринг)* · 🎮 demo
+PG-04. **Сид, хэш и воспроизводимость генерации**  
+   *(PRNG, PCG, хэш координат, детерминизм)* · 🎮 demo
+PG-05. **Diamond-square и midpoint displacement**  
+   *(фрактал, карта высот, шероховатость, 1/f)* · 🎮 demo
+PG-06. **Процедурные текстуры материалов**  
+   *(шум, преобразования Фурье, tiling)* · 🎮 demo
+
+### Планировка: пещеры, подземелья, карты
+
+PG-07. **Клеточные автоматы: пещеры за пять шагов**  
+   *(клеточные автоматы, 4-5 rule, связность, пещеры)* · 🎮 demo
+PG-08. **BSP-подземелья: разбиение, комнаты, коридоры**  
+   *(BSP, дерево, комнаты, связность)* · 🎮 demo
+PG-09. **Пьяная прогулка: пещера из случайных шагов**  
+   *(random walk, carving, плотность, прототип)* · 🎮 demo
+PG-10. **Лабиринты: backtracker, Прим, Крускал, Уилсон**  
+   *(остовное дерево, DFS, Прим, Крускал)* · 🎮 demo
+PG-11. **Wave Function Collapse: генерация по ограничениям**  
+   *(WFC, AC-3, энтропия, тайлы, откат)* · 🎮 demo
+PG-12. **Города и дорожные сети: Вороной, MST и кварталы**  
+   *(MST, Вороной, A*, градостроительство)* · 🎮 demo
+PG-13. **Генерация сбалансированных карт для стратегий**  
+   *(теория графов, симметрия, фэйрнесс)* · 🎮 demo
+
+### Миры и рельеф
+
+PG-14. **Процедурная генерация реалистичных ландшафтов**  
+   *(шум Перлина, фракталы, эрозия)* · 🎮 demo
+PG-15. **Гидравлическая эрозия: дождь, наносы и дельты**  
+   *(эрозия, осадки, карта высот, нормали)* · 🎮 demo
+PG-16. **Биомы: диаграмма Уиттекера, климат и переходы**  
+   *(Уиттекер, температура, влажность, климат)* · 🎮 demo
+PG-17. **Реки: направление стока, водосборы и русла**  
+   *(D8, аккумуляция, водосбор, озёра)* · 🎮 demo
+PG-18. **Генерация объёмных облаков**  
+   *(ray marching, функции плотности, Beer–Lambert)* · 🎮 demo
+PG-19. **Создание уникальных планетарных систем**  
+   *(законы Кеплера, n-body, зоны обитаемости)* · 🎮 demo
+PG-20. **Генерация воксельных миров**  
+   *(marching cubes, SDF, октодерево)* · 🎮 demo
+
+### Контент и системы
+
+PG-21. **L-системы: растения, города и фрактальные узоры**  
+   *(грамматика, черепашья графика, фрактал, растения)* · 🎮 demo
+PG-22. **Shape-грамматики: генеративные фасады и интерьеры**  
+   *(split grammar, фасады, правила, LOD)* · 🎮 demo
+PG-23. **Генератор предметов: редкость, аффиксы и бюджет**  
+   *(лут, аффиксы, редкость, бюджет)* · 🎮 demo
+PG-24. **Генерация имён: слоговая грамматика и цепи Маркова**  
+   *(Марков, слоги, фонотактика, нейминг)* · 🎮 demo
+PG-25. **Квесты и миссионные графы: ключи, двери и ритм**  
+   *(mission graph, lock-and-key, грамматика, солвабельность)* · 🎮 demo
+PG-26. **Процедурные музыкальные композиции**  
+   *(L-системы, теория музыки, марковские цепи)* · 🎮 demo
+PG-27. **Построение правдоподобных экосистем**  
+   *(Лотка–Вольтерра, динамические системы, трофические сети)* · 🎮 demo
+PG-28. **AI-директор: кривая напряжения и волны врагов**  
+   *(AI director, пейсинг, динамическая сложность, волны)* · 🎮 demo
 
 ---
 
@@ -370,17 +442,6 @@ python3 tools/gen_readme.py   # обновить этот README
 19. **Snapshot compression and delta encoding**  
    *(Shannon entropy, quantisation, delta)*
 
-### Procedural generation
-
-20. **Procedural planetary systems**  
-   *(Kepler's laws, n-body, habitable zone)* · 🎮 demo
-21. **Balanced strategy map generation**  
-   *(graph theory, symmetry, fairness)* · 🎮 demo
-22. **Lotka–Volterra ecosystems**  
-   *(Lotka–Volterra, dynamical systems, trophic webs)* · 🎮 demo
-23. **Procedural music with L-systems**  
-   *(L-systems, music theory, Markov chains)*
-
 ### Physical simulations
 
 24. **Cloth and soft bodies (Verlet, XPBD)**  
@@ -441,8 +502,6 @@ python3 tools/gen_readme.py   # обновить этот README
    *(BSP, PVS, occlusion culling)*
 46. **Ricochet and reflection vectors**  
    *(reflection, Snell's law, randomness)*
-47. **Voxel worlds and marching cubes**  
-   *(marching cubes, SDF, octree)* · 🎮 demo
 
 ### Game economies
 
@@ -487,6 +546,79 @@ python3 tools/gen_readme.py   # обновить этот README
    *(timestamp query, GPU counter, RenderDoc, occlusion query, pipeline statistics)*
 66. **Quality scaling and graceful degradation**  
    *(scalability, dynamic resolution, LOD bias, fallback, tier)*
+
+## Часть II — процедурная генерация / Part II — procedural generation
+
+> Отдельная часть исследования: полный атлас алгоритмов генерации контента.  
+> A separate part of the research: the full atlas of content generation.
+
+### Noise, fields and sampling
+
+PG-01. **Gradient noise: value, Perlin and simplex**  
+   *(value noise, Perlin, simplex, fBm)* · 🎮 demo
+PG-02. **Worley (cellular) noise: F1, F2 and borders**  
+   *(Voronoi, cellular noise, F2−F1, feature points)* · 🎮 demo
+PG-03. **Poisson disk sampling and blue noise**  
+   *(Bridson, blue noise, spatial hash, scattering)* · 🎮 demo
+PG-04. **Seeds, hashing and reproducible generation**  
+   *(PRNG, PCG, coordinate hash, determinism)* · 🎮 demo
+PG-05. **Diamond-square and midpoint displacement**  
+   *(fractal, heightmap, roughness, 1/f)* · 🎮 demo
+PG-06. **Procedural textures (noise, FFT, weathering)**  
+   *(noise, Fourier transform, tiling)* · 🎮 demo
+
+### Layout: caves, dungeons, maps
+
+PG-07. **Cellular automata caves**  
+   *(cellular automata, 4-5 rule, connectivity, caves)* · 🎮 demo
+PG-08. **BSP dungeons: splits, rooms, corridors**  
+   *(BSP, tree, rooms, connectivity)* · 🎮 demo
+PG-09. **Drunkard's walk caves**  
+   *(random walk, carving, density, prototype)* · 🎮 demo
+PG-10. **Maze generation: backtracker, Prim, Kruskal, Wilson**  
+   *(spanning tree, DFS, Prim, Kruskal)* · 🎮 demo
+PG-11. **Wave Function Collapse: constraint-based generation**  
+   *(WFC, AC-3, entropy, tiles, backtracking)* · 🎮 demo
+PG-12. **Cities and road networks: Voronoi, MST and blocks**  
+   *(MST, Voronoi, A*, city building)* · 🎮 demo
+PG-13. **Balanced strategy map generation**  
+   *(graph theory, symmetry, fairness)* · 🎮 demo
+
+### Worlds and terrain
+
+PG-14. **Procedural terrain with fBm and erosion**  
+   *(Perlin noise, fractals, erosion)* · 🎮 demo
+PG-15. **Hydraulic erosion: rain, sediment and deltas**  
+   *(erosion, sediment, heightmap, normals)* · 🎮 demo
+PG-16. **Biomes: Whittaker diagram, climate and transitions**  
+   *(Whittaker, temperature, moisture, climate)* · 🎮 demo
+PG-17. **Rivers: flow direction, watersheds and channels**  
+   *(D8, accumulation, watershed, lakes)* · 🎮 demo
+PG-18. **Volumetric clouds and ray marching**  
+   *(ray marching, density functions, Beer–Lambert)* · 🎮 demo
+PG-19. **Procedural planetary systems**  
+   *(Kepler's laws, n-body, habitable zone)* · 🎮 demo
+PG-20. **Voxel worlds and marching cubes**  
+   *(marching cubes, SDF, octree)* · 🎮 demo
+
+### Content and systems
+
+PG-21. **L-systems: plants, cities and fractal patterns**  
+   *(grammar, turtle graphics, fractal, plants)* · 🎮 demo
+PG-22. **Shape grammars: generative facades and interiors**  
+   *(split grammar, facades, rules, LOD)* · 🎮 demo
+PG-23. **Item generation: rarity, affixes and a stat budget**  
+   *(loot, affixes, rarity, budget)* · 🎮 demo
+PG-24. **Name generation: syllable grammar and Markov chains**  
+   *(Markov, syllables, phonotactics, naming)* · 🎮 demo
+PG-25. **Quests and mission graphs: keys, doors and pacing**  
+   *(mission graph, lock-and-key, grammar, solvability)* · 🎮 demo
+PG-26. **Procedural music with L-systems**  
+   *(L-systems, music theory, Markov chains)* · 🎮 demo
+PG-27. **Lotka–Volterra ecosystems**  
+   *(Lotka–Volterra, dynamical systems, trophic webs)* · 🎮 demo
+PG-28. **The AI director: a tension curve and enemy waves**  
+   *(AI director, pacing, dynamic difficulty, waves)* · 🎮 demo
 
 ---
 
@@ -637,17 +769,17 @@ python3 tools/gen_readme.py   # обновить этот README
 | 2 | Искусственный интеллект | Artificial intelligence |
 | 3 | Компьютерная графика | Computer graphics |
 | 4 | Сетевая синхронизация | Network synchronisation |
-| 5 | Процедурная генерация | Procedural generation |
-| 6 | Физические симуляции | Physical simulations |
-| 7 | Системы оптимизации | Optimisation systems |
-| 8 | Математические механики | Mathematical mechanics |
-| 9 | Статистика и баланс | Statistics and balance |
-| 10 | Геометрия и коллизии | Geometry and collisions |
-| 11 | Шейдеры и GPU | Shaders and GPU |
-| 12 | Игровые экономики | Game economies |
-| 13 | Аудио-системы | Audio systems |
-| 14 | Нейросетевые приложения | Neural network applications |
-| 15 | Тяжёлые нагрузки и GPU | Heavy workloads and GPU |
+| 5 | Физические симуляции | Physical simulations |
+| 6 | Системы оптимизации | Optimisation systems |
+| 7 | Математические механики | Mathematical mechanics |
+| 8 | Статистика и баланс | Statistics and balance |
+| 9 | Геометрия и коллизии | Geometry and collisions |
+| 10 | Шейдеры и GPU | Shaders and GPU |
+| 11 | Игровые экономики | Game economies |
+| 12 | Аудио-системы | Audio systems |
+| 13 | Нейросетевые приложения | Neural network applications |
+| 14 | Тяжёлые нагрузки и GPU | Heavy workloads and GPU |
+| 15 | Процедурная генерация | Procedural generation |
 
 ---
 

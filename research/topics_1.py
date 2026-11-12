@@ -499,7 +499,7 @@ def steer(b, grid, cell, R=60):
         demo="boids",
     ),
     dict(
-        n=11, id="terrain", cat="graphics", level=2,
+        n=11, id="terrain", cat="procgen", pg="world", level=2,
         title="Процедурная генерация реалистичных ландшафтов",
         en="Procedural terrain with fBm and erosion",
         tags=["шум Перлина", "фракталы", "эрозия"],
