@@ -3,10 +3,12 @@
 Темы хранятся как данные, а не как разметка: HTML собирается скриптом.
 Topics are stored as data, not as markup: the HTML pages are built by a script.
 
-Документ разделён на две части: **Часть I — системы** (механики, ИИ, графика,
-сеть, физика, оптимизация, математика, статистика, геометрия, шейдеры, экономика,
-аудио, нейросети, тяжёлые нагрузки) и **Часть II — процедурная генерация** —
-отдельный атлас из 28 тем с собственной нумерацией `PG-01…PG-28` и четырьмя слоями.
+Документ разделён на три части: **Часть I — системы** (механики, ИИ, графика,
+физика, оптимизация, математика, статистика, геометрия, шейдеры, экономика,
+аудио, нейросети, тяжёлые нагрузки), **Часть II — процедурная генерация** —
+отдельный атлас из 28 тем с нумерацией `PG-01…PG-28` — и **Часть III — сетевое
+взаимодействие**: 22 темы с нумерацией `NET-01…NET-22`, от транспорта до
+эксплуатации крупной MMO.
 
 ## Русский контент / Russian content
 
@@ -35,6 +37,17 @@ Topics are stored as data, not as markup: the HTML pages are built by a script.
 `PG-01…PG-28` на странице. Группа темы задаётся полем `pg`:
 `foundation`, `layout`, `world` или `content`.
 
+### Часть III — сетевое взаимодействие
+
+| Файл | Слои и темы |
+|---|---|
+| `topics_net_a.py` | 01 «Транспорт и топология» и 02 «Модели синхронизации»: transport, reliable, topology, NAT, browser, rollback, determinism (темы 87–93) |
+| `topics_net_b.py` | 03 «Реальное время» и 04 «Масштаб и эксплуатация»: interp, lagcomp, AOI, clock, budget, shard, session, persistence, security, ops, testing (темы 94–104) |
+| `topics_2.py` (перенесены) | `prediction`, `anticheat`, `lockstep`, `snapshot` — уже `cat="network"` |
+
+Порядок задаёт `NET_ORDER` в `i18n.py`, он же формирует номера `NET-01…NET-22`.
+Группа темы задаётся полем `nl`: `transport`, `sync`, `realtime` или `scale`.
+
 ## Английский контент / English content
 
 | Файл | Темы |
@@ -47,6 +60,8 @@ Topics are stored as data, not as markup: the HTML pages are built by a script.
 | `topics_en_6.py` | 58–66 (heavy / GPU) |
 | `topics_en_procgen_a.py` | Часть II, слои 01–02 (19 новых тем; 8 перенесённых уже были на английском) |
 | `topics_en_procgen_b.py` | Часть II, слои 03–04 |
+| `topics_en_net_a.py` | Часть III, слои 01–02 |
+| `topics_en_net_b.py` | Часть III, слои 03–04 |
 | `appendix_en.py` | 45 практических задач на английском (`APPENDIX_EN`) |
 | `codes_en.py` | английские версии примеров кода (`CODE_EN`) — комментарии переведены |
 | `i18n.py` | разделы, подписи интерфейса, словарь, строки оболочки (RU + EN), `PARTS`, `PG_GROUPS`, `PG_ORDER`, `PG_DECISIONS` |
@@ -70,6 +85,8 @@ Topics are stored as data, not as markup: the HTML pages are built by a script.
 - `demo` — необязательный ключ демо из `assets/demos-*.js`
 - `pg` — **только для `cat="procgen"`**: слой части II
   (`foundation` / `layout` / `world` / `content`)
+- `nl` — **только для `cat="network"`**: слой части III
+  (`transport` / `sync` / `realtime` / `scale`)
 
 ## Демо / Demos
 
@@ -80,6 +97,7 @@ Topics are stored as data, not as markup: the HTML pages are built by a script.
 | `assets/demos-c.js` | GPU-частицы, бюджет кадра, отсечение, батчинг |
 | `assets/demos-procgen-a.js` | шум, Ворли, Пуассон, сид/хэш, материалы, diamond-square, пещеры, BSP, random walk, лабиринты, WFC |
 | `assets/demos-procgen-b.js` | город, эрозия, биомы, реки, облака, L-системы, предметы, имена, квесты, музыка, AI-директор |
+| `assets/demos-network.js` | транспорт и надёжность, топологии и NAT, rollback и интерполяция, лаг-компенсация, AOI, бюджет, шардинг, матчмейкинг, rate limit |
 
 Демо монтируются лениво (`IntersectionObserver`) и останавливаются вне экрана.
 Все подписи — через `T('key')`, ключи лежат в `assets/labels.js` (RU + EN).
@@ -101,8 +119,9 @@ python3 tools/gen_readme.py  # → README.md (список тем и задач)
 
 1. Добавьте словарь в подходящий `topics_*.py` (RU) и в `topics_en_*.py` (EN) —
    с тем же `id`.
-2. Для части II добавьте `cat="procgen"`, `pg="<слой>"` и `id` в `PG_ORDER`.
-3. Для интерактивной модели — функцию в `assets/demos-procgen-a.js` /
-   `demos-procgen-b.js` (`DEMOS.<имя> = function (el) { ... }`) и укажите
+2. Для части II добавьте `cat="procgen"`, `pg="<слой>"` и `id` в `PG_ORDER`;
+   для части III — `cat="network"`, `nl="<слой>"` и `id` в `NET_ORDER`.
+3. Для интерактивной модели — функцию в `assets/demos-procgen-*.js` /
+   `demos-network.js` (`DEMOS.<имя> = function (el) { ... }`) и укажите
    `demo="<имя>"`. Подписи добавьте в `assets/labels.js` (RU и EN).
 4. Запустите сборку и откройте HTML.

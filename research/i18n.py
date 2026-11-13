@@ -33,10 +33,12 @@ CATS = {
     },
     "network": {
         "color": "#fda4af",
-        "ru": ("Сетевая синхронизация",
-               "Предсказание, античит, детерминированный lockstep и сжатие снапшотов."),
-        "en": ("Network synchronisation",
-               "Prediction, anti-cheat, deterministic lockstep and snapshot compression."),
+        "ru": ("Сетевое взаимодействие",
+               "Транспорты и топологии, предсказание и rollback, лаг-компенсация, "
+               "interest management, шардинг, БД, античит и эксплуатация MMO."),
+        "en": ("Networked multiplayer",
+               "Transports and topologies, prediction and rollback, lag compensation, "
+               "interest management, sharding, databases, anti-cheat and MMO operations."),
     },
     "procgen": {
         "color": "#6ee7b7",
@@ -123,15 +125,15 @@ CATS = {
 # "procgen" намеренно стоит последним: это отдельная часть исследования
 # (Part II), а не ещё одна глава среди систем.
 CHAPTER_ORDER = [
-    "mechanics", "ai", "gfx", "network", "physics", "optimize",
+    "mechanics", "ai", "gfx", "physics", "optimize",
     "math", "stats", "geometry", "shaders", "economy", "audio", "ml", "heavy",
-    "procgen",
+    "procgen", "network",
 ]
 
 # --------------------------------------------------------------------------
 # отдельная часть: процедурная генерация
 # --------------------------------------------------------------------------
-PART_OF = {"procgen": "procgen"}
+PART_OF = {"procgen": "procgen", "network": "network"}
 
 PARTS = {
     "procgen": {
@@ -159,6 +161,8 @@ PARTS = {
                    "and a live in-browser model. Topics are grouped into four layers, "
                    "from the foundation up to content and drama."),
         },
+        "guide_title": {"ru": "Что генерируем → чем", "en": "What you generate → with what"},
+        "guide_hint": {"ru": "быстрый выбор алгоритма", "en": "a quick algorithm chooser"},
         "note": {
             "ru": ("Все остальные разделы — «Часть I: системы». Процедурная генерация "
                    "выделена отдельно, потому что это не одна механика, а сквозная "
@@ -166,6 +170,45 @@ PARTS = {
             "en": ("All other sections form “Part I: systems”. Procedural generation is "
                    "kept apart because it is not a single mechanic but a cross-cutting "
                    "discipline: the same techniques produce terrain, loot, levels and music."),
+        },
+    },
+    "network": {
+        "kicker": {"ru": "Часть III · сетевой плейбук", "en": "Part III · multiplayer playbook"},
+        "title": {"ru": "Сетевое взаимодействие", "en": "Networked multiplayer"},
+        "subtitle": {"ru": "Как игра договаривается сама с собой", "en": "How the game agrees with the game"},
+        "lede": {
+            "ru": ("Всё о сети: транспорты UDP, TCP и QUIC, надёжность и congestion control, "
+                   "топологии dedicated / listen / P2P / relay, NAT и ICE; предсказание, "
+                   "лаг-компенсация, интерполяция и rollback; interest management, тики и "
+                   "часы; шардинг, бесшовные миры, сессии и матчмейкинг, персистентность MMO, "
+                   "защита от читеров и DDoS, наблюдаемость и нагрузочные боты. Каждая тема — "
+                   "модель, формула, код и живая модель в браузере."),
+            "en": ("Everything about networking: UDP, TCP and QUIC transports, reliability and "
+                   "congestion control, dedicated / listen / P2P / relay topologies, NAT and ICE; "
+                   "prediction, lag compensation, interpolation and rollback; interest management, "
+                   "ticks and clocks; sharding, seamless worlds, sessions and matchmaking, MMO "
+                   "persistence, anti-cheat and DDoS defence, observability and load bots. Every "
+                   "topic ships a model, a formula, working code and a live in-browser model."),
+        },
+        "note": {
+            "ru": ("Часть I — системы, Часть II — генерация. Сеть выделена отдельно: это не "
+                   "«ещё одна механика», а инфраструктура, которая определяет, какие механики "
+                   "вообще возможны. Секреты больших MMO — не в одном трюке, а в бюджете "
+                   "задержки, полосы и доверия, который проектируется целиком."),
+            "en": ("Part I covers systems, Part II covers generation. Networking is separate "
+                   "because it is not another mechanic but the infrastructure that decides which "
+                   "mechanics are even possible. The secrets of large MMOs are not a single trick "
+                   "but a latency, bandwidth and trust budget designed end to end."),
+        },
+        "guide_title": {"ru": "Что синхронизируем → как", "en": "What you synchronise → how"},
+        "guide_hint": {"ru": "быстрый выбор модели", "en": "a quick model chooser"},
+        "guide_note": {
+            "ru": ("Модель выбирается под жанр и бюджет задержки, а не по моде. Шутер без "
+                   "предсказания ощущается «резиновым», RTS без детерминизма расходится, "
+                   "MMO без interest management тонет в трафике."),
+            "en": ("Pick the model by genre and latency budget, not by fashion. A shooter without "
+                   "prediction feels rubbery, an RTS without determinism desyncs, an MMO without "
+                   "interest management drowns in traffic."),
         },
     },
 }
@@ -261,6 +304,96 @@ PG_DECISIONS = [
 ]
 
 # --------------------------------------------------------------------------
+# Часть III: сеть — слои, порядок, сценарии выбора
+# --------------------------------------------------------------------------
+NET_GROUP_ORDER = ["transport", "sync", "realtime", "scale"]
+
+NET_GROUPS = {
+    "transport": {
+        "color": "#fda4af",
+        "num": "01",
+        "ru": ("Транспорт и топология",
+               "UDP, TCP, QUIC и WebTransport; надёжность и congestion control; dedicated, "
+               "listen, P2P и relay; NAT, STUN, TURN и ICE; браузер и мобильные сети."),
+        "en": ("Transport and topology",
+               "UDP, TCP, QUIC and WebTransport; reliability and congestion control; dedicated, "
+               "listen, P2P and relay; NAT, STUN, TURN and ICE; browsers and mobile radio."),
+    },
+    "sync": {
+        "color": "#c4b5fd",
+        "num": "02",
+        "ru": ("Модели синхронизации",
+               "Детерминированный lockstep, клиентское предсказание с примирением, "
+               "дельта-снапшоты, rollback и фиксированная точка вместо float."),
+        "en": ("Synchronisation models",
+               "Deterministic lockstep, client-side prediction and reconciliation, delta "
+               "snapshots, rollback and fixed point instead of floats."),
+    },
+    "realtime": {
+        "color": "#7dd3fc",
+        "num": "03",
+        "ru": ("Реальное время",
+               "Интерполяция и jitter buffer, лаг-компенсация с rewind, interest management, "
+               "синхронизация часов и тиков, бюджет полосы и приоритизация."),
+        "en": ("Real-time techniques",
+               "Interpolation and jitter buffers, lag compensation with rewind, interest "
+               "management, clock and tick sync, bandwidth budget and prioritisation."),
+    },
+    "scale": {
+        "color": "#fbbf6b",
+        "num": "04",
+        "ru": ("Масштаб и эксплуатация",
+               "Шардинг и бесшовные миры, сессии и матчмейкинг, персистентность MMO, "
+               "античит, DDoS и rate limit, наблюдаемость, нагрузочные боты и live-ops."),
+        "en": ("Scale and operations",
+               "Sharding and seamless worlds, sessions and matchmaking, MMO persistence, "
+               "anti-cheat, DDoS and rate limits, observability, load bots and live ops."),
+    },
+}
+
+# порядок тем внутри части III (он же задаёт номера NET-01 …)
+NET_ORDER = [
+    # transport
+    "nettransport", "netreliable", "nettopology", "netnat", "netbrowser",
+    # sync
+    "lockstep", "prediction", "snapshot", "netrollback", "netdeterminism",
+    # realtime
+    "netinterp", "netlagcomp", "netaoi", "netclock", "netbudget",
+    # scale
+    "netshard", "netsession", "netpersist", "anticheat", "netsecurity",
+    "netops", "nettest",
+]
+
+NET_DECISIONS = [
+    {"ru": ("Шутер 5v5 с быстрым движением", "client prediction + lag compensation, 30–60 Гц"),
+     "en": ("Fast 5v5 shooter", "client prediction + lag compensation, 30–60 Hz")},
+    {"ru": ("Файтинг или спорт", "rollback netcode, фиксированная точка и детерминизм"),
+     "en": ("Fighting or sports game", "rollback netcode, fixed point and determinism")},
+    {"ru": ("RTS или MOBA", "lockstep + контрольные суммы, детерминированная симуляция"),
+     "en": ("RTS or MOBA", "lockstep + checksums, deterministic simulation")},
+    {"ru": ("MMO на тысячи игроков", "шардинг, interest management, дельта-снапшоты, БД"),
+     "en": ("An MMO with thousands of players", "sharding, interest management, delta snapshots, DB")},
+    {"ru": ("Кооп на 2–8 игроков", "listen-сервер или relay, авторитет у хоста"),
+     "en": ("2–8 player co-op", "listen server or relay, host authority")},
+    {"ru": ("Игра в браузере", "WebSocket, WebRTC data channels, WebTransport"),
+     "en": ("Browser game", "WebSocket, WebRTC data channels, WebTransport")},
+    {"ru": ("Мобильные сессии и метро", "терпимость к потере пакетов, reconnect, пауза"),
+     "en": ("Mobile sessions and radio", "packet-loss tolerance, reconnect, pause")},
+    {"ru": ("Открытый мир без загрузок", "бесшовные зоны, handoff, кэш соседей"),
+     "en": ("Seamless open world", "seamless zones, handoff, neighbour cache")},
+    {"ru": ("Экономика и инвентарь", "транзакции, идемпотентность, event sourcing"),
+     "en": ("Economy and inventory", "transactions, idempotency, event sourcing")},
+    {"ru": ("Матчмейкинг и рейтинг", "рейтинг + регион + backfill после лива"),
+     "en": ("Matchmaking and rating", "rating + region + backfill after a leaver")},
+    {"ru": ("Читеры, боты и абуз", "server authority, статистика, rate limit"),
+     "en": ("Cheaters, bots and abuse", "server authority, statistics, rate limits")},
+    {"ru": ("Релиз и DDoS", "anycast, лимиты, очереди, graceful degradation"),
+     "en": ("Launch and DDoS", "anycast, limits, queues, graceful degradation")},
+    {"ru": ("Отладка сети", "netem, chaos-тесты, нагрузочные боты, SLO"),
+     "en": ("Network debugging", "netem, chaos tests, load bots, SLOs")},
+]
+
+# --------------------------------------------------------------------------
 # уровни сложности
 # --------------------------------------------------------------------------
 LEVEL_LABEL = {
@@ -307,6 +440,54 @@ DEMO_TITLES = {
     "lockstep": {
         "ru": "Lockstep: лаг, безопасный тик и desync",
         "en": "Lockstep: lag, safe tick and desync",
+    },
+    "transport": {
+        "ru": "UDP против TCP и QUIC под потерями",
+        "en": "UDP vs TCP and QUIC under loss",
+    },
+    "reliability": {
+        "ru": "Надёжный канал: окно, ACK и RTO",
+        "en": "Reliable channel: window, ACK and RTO",
+    },
+    "topology": {
+        "ru": "Топологии: dedicated, listen, P2P и релей",
+        "en": "Topologies: dedicated, listen, P2P and relay",
+    },
+    "nat": {
+        "ru": "NAT: STUN, punch и дорога через TURN",
+        "en": "NAT: STUN, punch and the TURN detour",
+    },
+    "rollback": {
+        "ru": "Rollback: поздний ввод и ресимуляция",
+        "en": "Rollback: late input and resimulation",
+    },
+    "interp": {
+        "ru": "Интерполяция и буфер против джиттера",
+        "en": "Interpolation and the jitter buffer",
+    },
+    "lagcomp": {
+        "ru": "Лаг-компенсация и окно отката",
+        "en": "Lag compensation and the rewind window",
+    },
+    "aoi": {
+        "ru": "Interest management: круг видимости",
+        "en": "Interest management: circle of relevance",
+    },
+    "budget": {
+        "ru": "Бюджет трафика и приоритеты",
+        "en": "Bandwidth budget and priorities",
+    },
+    "shard": {
+        "ru": "Шардинг мира и передача на границе",
+        "en": "World sharding and border handoff",
+    },
+    "session": {
+        "ru": "Очередь матчмейкера и окно MMR",
+        "en": "Matchmaking queue and the MMR window",
+    },
+    "security": {
+        "ru": "Token bucket против флуда и DDoS",
+        "en": "Token bucket against floods and DDoS",
     },
     "planets": {
         "ru": "Орбиты Кеплера и зона обитаемости",
@@ -587,6 +768,7 @@ STRINGS = {
     },
     "hero_start": {"ru": "Начать изучение", "en": "Start reading"},
     "hero_procgen": {"ru": "Атлас генерации", "en": "Generation atlas"},
+    "hero_network": {"ru": "Сетевой атлас", "en": "Network atlas"},
     "hero_tasks": {"ru": "{n} практических задач", "en": "{n} practical tasks"},
     "stat_topics": {"ru": "тем · {n} разделов", "en": "topics · {n} sections"},
     "stat_demos": {"ru": "интерактивных демо", "en": "interactive demos"},
@@ -612,7 +794,9 @@ STRINGS = {
     "progress": {"ru": "Прогресс", "en": "Progress"},
     "sections": {"ru": "Разделы", "en": "Sections"},
     "nav_procgen": {"ru": "Процедурная генерация", "en": "Procedural generation"},
+    "nav_network": {"ru": "Сеть: MMO и netcode", "en": "Networking: MMO & netcode"},
     "nav_procgen_short": {"ru": "Генерация", "en": "Generation"},
+    "nav_network_short": {"ru": "Сеть", "en": "Netcode"},
     "part_label": {"ru": "часть {i}", "en": "part {i}"},
     "part_topics": {"ru": "{n} тем · {g} слоя", "en": "{n} topics · {g} layers"},
     "part_atlas_title": {"ru": "Атлас алгоритмов", "en": "Algorithm atlas"},
@@ -634,7 +818,7 @@ STRINGS = {
     "part_stat_guide": {"ru": "сценариев выбора", "en": "algorithm recipes"},
     "part_minutes": {"ru": "{n} интерактивных моделей", "en": "{n} interactive models"},
     "part_filter": {"ru": "Слой", "en": "Layer"},
-    "topic_part_of": {"ru": "{n} / {total} · часть II", "en": "{n} / {total} · part II"},
+    "topic_part_of": {"ru": "{n} / {total} · часть {part}", "en": "{n} / {total} · part {part}"},
     "side_foot": {
         "ru": ("Документ работает офлайн: все стили, скрипты и демо встроены в один файл. "
                "Прогресс и тема хранятся локально в браузере."),
@@ -779,4 +963,112 @@ STRINGS = {
         "ru": "Полная версия на английском",
         "en": "Full version in Russian",
     },
+    "mode": {"ru": "режим", "en": "mode"},
+    "loss": {"ru": "потери", "en": "loss"},
+    "rtt": {"ru": "RTT", "en": "RTT"},
+    "delivered": {"ru": "доставлено", "en": "delivered"},
+    "stalls": {"ru": "блокировки", "en": "stalls"},
+    "stream": {"ru": "поток", "en": "stream"},
+    "transport_note": {
+        "ru": "UDP теряет пакет и едет дальше; TCP встаёт целиком; QUIC тормозит только свой stream.",
+        "en": "UDP drops one packet and moves on; TCP stops entirely; QUIC stalls only that stream.",
+    },
+    "inflight": {"ru": "в полёте", "en": "in flight"},
+    "retrans": {"ru": "ретрансмиссии", "en": "retransmits"},
+    "rto": {"ru": "RTO", "en": "RTO"},
+    "reliability_note": {
+        "ru": "Окно ограничивает полёт, ACK двигает базу, потеря ждёт RTO и уходит повторно.",
+        "en": "The window caps in-flight data, ACKs move the base, a loss waits for RTO then retries.",
+    },
+    "authority": {"ru": "авторитет", "en": "authority"},
+    "links": {"ru": "связей", "en": "links"},
+    "host_adv": {"ru": "преимущество хоста", "en": "host advantage"},
+    "dedicated": {"ru": "выделенный", "en": "dedicated"},
+    "listen": {"ru": "listen-сервер", "en": "listen server"},
+    "relay": {"ru": "релей", "en": "relay"},
+    "send": {"ru": "отправить", "en": "send"},
+    "peers": {"ru": "пиры", "en": "peers"},
+    "host": {"ru": "хост", "en": "host"},
+    "server": {"ru": "сервер", "en": "server"},
+    "topology_note": {
+        "ru": "P2P экономит серверы, но авторитет размыт; релей прячет адреса и добавляет хоп.",
+        "en": "P2P saves servers but blurs authority; a relay hides addresses and adds a hop.",
+    },
+    "path": {"ru": "путь", "en": "path"},
+    "direct": {"ru": "напрямую", "en": "direct"},
+    "relay_cost": {"ru": "цена релея", "en": "relay cost"},
+    "symmetric_nat": {"ru": "симметричный NAT", "en": "symmetric NAT"},
+    "punch": {"ru": "пробить", "en": "punch"},
+    "nat_note": {
+        "ru": "STUN даёт адрес, сигнализация обменивается им, punch открывает порт; symmetric NAT требует TURN.",
+        "en": "STUN reveals the address, signalling swaps it, punch opens the port; symmetric NAT needs TURN.",
+    },
+    "rollback": {"ru": "откат", "en": "rollback"},
+    "resims": {"ru": "ресимуляции", "en": "resims"},
+    "depth": {"ru": "глубина", "en": "depth"},
+    "input_delay": {"ru": "задержка ввода", "en": "input delay"},
+    "rollback_marker": {"ru": "цель отката", "en": "rewind target"},
+    "rollback_note": {
+        "ru": "Пришёл поздний ввод — откатываем состояние к нему и пересимулируем кадры.",
+        "en": "A late input arrives: rewind state to it and resimulate the frames.",
+    },
+    "delay": {"ru": "задержка", "en": "delay"},
+    "jitter": {"ru": "джиттер", "en": "jitter"},
+    "error": {"ru": "ошибка", "en": "error"},
+    "extrapolate": {"ru": "экстраполяция", "en": "extrapolate"},
+    "interp_note": {
+        "ru": "Рендерим прошлое между снапшотами; джиттер лечится буфером, экстраполяция — риском.",
+        "en": "We render the past between snapshots; a buffer absorbs jitter, extrapolation adds risk.",
+    },
+    "rewind_ms": {"ru": "откат, мс", "en": "rewind, ms"},
+    "hits": {"ru": "попадания", "en": "hits"},
+    "shots": {"ru": "выстрелы", "en": "shots"},
+    "lag_comp": {"ru": "лаг-компенсация", "en": "lag compensation"},
+    "fire": {"ru": "выстрел", "en": "fire"},
+    "range": {"ru": "окно, мс", "en": "window, ms"},
+    "lagcomp_note": {
+        "ru": "Сервер отматывает цели на RTT стрелка; слишком большое окно открывает прострел сквозь стены.",
+        "en": "The server rewinds targets by the shooter RTT; too wide a window lets shots through walls.",
+    },
+    "visible": {"ru": "видно", "en": "visible"},
+    "total": {"ru": "всего", "en": "total"},
+    "bandwidth": {"ru": "трафик", "en": "bandwidth"},
+    "aoi_radius": {"ru": "радиус AOI", "en": "AOI radius"},
+    "budget": {"ru": "бюджет", "en": "budget"},
+    "aoi_note": {
+        "ru": "Релевантность по расстоянию: всё за кругом не реплицируется вовсе.",
+        "en": "Distance relevance: anything outside the circle is never replicated.",
+    },
+    "sent": {"ru": "отправлено", "en": "sent"},
+    "dropped": {"ru": "отброшено", "en": "dropped"},
+    "bytes": {"ru": "байты", "en": "bytes"},
+    "budget_note": {
+        "ru": "Сначала уходят важные и изменившиеся сущности; остальное ждёт следующего тика.",
+        "en": "Important and changed entities go first; the rest waits for the next tick.",
+    },
+    "shards": {"ru": "шарды", "en": "shards"},
+    "players": {"ru": "игроки", "en": "players"},
+    "handoffs": {"ru": "передач", "en": "handoffs"},
+    "shard_note": {
+        "ru": "Зоны режут мир, игрок на границе переезжает между процессами без экрана загрузки.",
+        "en": "Zones cut the world; a player on a border moves between processes without a loading screen.",
+    },
+    "queue": {"ru": "в очереди", "en": "queued"},
+    "wait": {"ru": "ожидание", "en": "wait"},
+    "matches": {"ru": "матчи", "en": "matches"},
+    "window": {"ru": "окно MMR", "en": "MMR window"},
+    "session_note": {
+        "ru": "Матчмейкер расширяет окно MMR со временем ожидания, цена — качество матча.",
+        "en": "The matchmaker widens the MMR window with wait time; the price is match quality.",
+    },
+    "allowed": {"ru": "пропущено", "en": "allowed"},
+    "blocked_count": {"ru": "заблокировано", "en": "blocked"},
+    "drop_rate": {"ru": "доля блока", "en": "drop rate"},
+    "attack": {"ru": "атака", "en": "attack"},
+    "limit": {"ru": "лимит", "en": "limit"},
+    "security_note": {
+        "ru": "Token bucket режет всплеск до лимита; за прокси и CDN считается уже другой лимит.",
+        "en": "A token bucket clips the burst to the limit; behind a proxy and CDN the limit is different.",
+    },
+
 }

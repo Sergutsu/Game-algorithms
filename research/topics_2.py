@@ -105,7 +105,7 @@ vec4 marchClouds(vec3 ro, vec3 rd, float dither, float maxDist) {
         demo="clouds",
     ),
     dict(
-        n=16, id="prediction", cat="network", level=2,
+        n=16, id="prediction", cat="network", nl="sync", level=2,
         title="Предсказание движения в FPS",
         en="Client-side prediction and interpolation",
         tags=["фильтр Калмана", "экстраполяция", "rollback"],
@@ -164,7 +164,7 @@ class PredictedPlayer
         games=["CS:GO / CS2", "Valorant", "Overwatch", "Quake III Arena"],
     ),
     dict(
-        n=17, id="anticheat", cat="network", level=3,
+        n=17, id="anticheat", cat="network", nl="scale", level=3,
         title="Система защиты от читеров",
         en="Anti-cheat: statistical anomaly detection",
         tags=["z-score", "аномалии", "доверие"],
@@ -210,7 +210,7 @@ def suspicious(player, population):
         games=["Valve Anti-Cheat", "Riot Vanguard", "Easy Anti-Cheat", "BattlEye"],
     ),
     dict(
-        n=18, id="lockstep", cat="network", level=3,
+        n=18, id="lockstep", cat="network", nl="sync", level=3,
         title="Детерминированная симуляция RTS",
         en="Deterministic lockstep simulation",
         tags=["fixed-point", "детерминизм", "lockstep"],
@@ -262,7 +262,7 @@ public struct Rng
         demo="lockstep",
     ),
     dict(
-        n=19, id="snapshot", cat="network", level=3,
+        n=19, id="snapshot", cat="network", nl="sync", level=3,
         title="Оптимизация передачи состояния мира",
         en="Snapshot compression and delta encoding",
         tags=["энтропия Шеннона", "квантование", "дельта"],
