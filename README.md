@@ -4,8 +4,8 @@
 
 > ### 📘 Полное исследование: [game-algorithms-research.html](game-algorithms-research.html)
 > Один автономный HTML-файл (открывается двойным кликом, работает офлайн):
-> **104 тем** с математической моделью, пошаговой реализацией, рабочим кодом,
-> сложностью, типичными ошибками и референсами; **55 интерактивных демо**
+> **164 тем** с математической моделью, пошаговой реализацией, рабочим кодом,
+> сложностью, типичными ошибками и референсами; **62 интерактивных демо**
 > (шум и эрозия, пещеры и подземелья, BSP, лабиринты, WFC, биомы, реки, города,
 > предметы, имена, квесты, музыка, фасады, а также баллистика, boids и lockstep);
 > **45 практических задач** и словарь терминов.
@@ -14,19 +14,29 @@
 > 28 живых моделей, четыре слоя — от шума и сэмплинга до контента и драматургии.
 > **Часть III — сетевое взаимодействие**: 22 темы, 13 живых моделей,
 > четыре слоя — транспорт, синхронизация, реальное время и масштаб.
+> **Часть IV — баланс и прогрессия**: 24 темы, 7 живых моделей — урон и
+> защита, кривые опыта, награды, инфляция и Монте-Карло-симулятор баланса.
+> **Часть V — атлас жанров**: 36 жанров с ядром цикла, темпом и провалами.
+> **Часть VI — стиль и студия промптов**: 47 атомов стиля, 8 пресетов и
+> конструктор, который собирает из досье готовое задание для команды или модели.
 > Поиск, фильтры по сложности, прогресс чтения, тёмная/светлая темы и переключатель
 > языка — внутри.
 >
 > Исходники контента — `research/`, сборка — `python3 tools/build.py`, стили и демо — `assets/`.
 
 > ### 📗 Full research (English): [index.en.html](index.en.html)
-> The same research in English: **104 topics** with the mathematical model, a
+> The same research in English: **164 topics** with the mathematical model, a
 > step-by-step build, working code, complexity, pitfalls and references;
-> **55 interactive demos**; **45 practical tasks** and a glossary.
+> **62 interactive demos**; **45 practical tasks** and a glossary.
 > **Part II — procedural generation** is a separate atlas: 28 topics, 28 live
 > models, four layers from noise and sampling up to content and drama.
 > **Part III — networked multiplayer**: 22 topics, 13 live models,
 > four layers: transport, synchronisation, real time and scale.
+> **Part IV — balance and progression**: 24 topics, 7 live models — damage
+> and defence, XP curves, rewards, inflation and a Monte-Carlo balance simulator.
+> **Part V — the genre atlas**: 36 genres with their core loop, tempo and pitfalls.
+> **Part VI — style and the prompt studio**: 47 style atoms, 8 presets and a
+> composer that turns the dossier into a brief for a team or a model.
 > A language switch sits in the header and remembers your choice.
 
 **Онлайн / Live:** <https://sergutsu.github.io/Game-algorithms/> — GitHub Pages, корень репозитория, ветка `main`
@@ -59,11 +69,21 @@ python3 tools/gen_readme.py   # обновить этот README
 | `research/topics_en_*.py` | Часть I, темы EN (те же id, английский текст) |
 | `research/topics_en_procgen_*.py` | Часть II на английском |
 | `research/topics_en_net_*.py` | Часть III на английском |
+| `research/topics_balance_a.py` | Часть IV, слои 01–03: урон, защита, прогрессия (RU) |
+| `research/topics_balance_b.py` | Часть IV, слои 04–05: награды, экономика, симуляция (RU) |
+| `research/topics_genres_a.py` | Часть V, экшен / стратегии / RPG — 18 жанров (RU) |
+| `research/topics_genres_b.py` | Часть V, симуляции / приключения / спорт — 18 жанров (RU) |
+| `research/topics_en_balance_*.py` | Часть IV на английском |
+| `research/topics_en_genres_*.py` | Часть V на английском |
+| `research/genres_en.py` | Английские формулы и темпы для всех 36 жанров |
+| `research/styles.py` | Часть VI: слои стиля, атомы, пресеты, форматы промпта |
+| `research/studio_i18n.py` | Подписи и шаблоны конструктора промптов (RU + EN) |
 | `research/appendix_en.py` | 45 практических задач на английском |
 | `research/codes_en.py` | Английские комментарии в примерах кода |
 | `research/i18n.py` | Разделы, подписи интерфейса, словарь, строки оболочки (RU + EN) |
 | `tools/build.py` | Сборщик: `research/*.py` + `assets/` → два HTML |
-| `assets/` | Стили, клиентская логика, 55 демо, таблицы подписей |
+| `assets/studio.js` | Конструктор промптов: выборки, пресеты, сборка и экспорт |
+| `assets/` | Стили, клиентская логика, 62 демо, таблицы подписей |
 
 ---
 
@@ -206,8 +226,7 @@ python3 tools/gen_readme.py   # обновить этот README
 
 ## Часть II — процедурная генерация / Part II — procedural generation
 
-> Отдельная часть исследования: полный атлас алгоритмов генерации контента.  
-> A separate part of the research: the full atlas of content generation.
+> Отдельная часть исследования: полный атлас алгоритмов генерации контента.
 
 ### Шум, поля и выборки
 
@@ -279,8 +298,7 @@ PG-28. **AI-директор: кривая напряжения и волны в
 
 ## Часть III — сетевое взаимодействие / Part III — networked multiplayer
 
-> Отдельная часть исследования: полный сетевой плейбук, от UDP до операций крупной MMO.  
-> A separate part of the research: the full networking playbook, from UDP to large-MMO operations.
+> Отдельная часть исследования: полный сетевой плейбук, от UDP до операций крупной MMO.
 
 ### Транспорт и топология
 
@@ -337,6 +355,174 @@ NET-21. **Эксплуатация: метрики, SLO, трейсы и live-op
    *(observability, SLO, metrics, live-ops)*
 NET-22. **Тестирование сети: netem, хаос и нагрузочные боты**  
    *(netem, chaos, load test, replay)*
+
+## Часть IV — баланс и прогрессия / Part IV — balance and progression
+
+> Числа, из которых складывается ощущение игры: урон, защита, кривая опыта, награды и экономика.
+
+### Урон
+
+BAL-01. **Броня и кривая смягчения урона**  
+   *(armour, mitigation, Time-to-kill, curve)* · 🎮 demo
+BAL-02. **Формула урона: слои сложения и умножения**  
+   *(damage formula, modifiers, buckets, stacking)*
+BAL-03. **Эффективное здоровье, TTK и выстрелы до убийства**  
+   *(EHP, TTK, STK, breakpoints)* · 🎮 demo
+BAL-04. **Разброс урона, шанс попадания и дисперсия**  
+   *(variance, RNG, hit chance, expected value)*
+BAL-05. **Периодический урон: стаки, обновление и тики**  
+   *(DoT, stacking, tick rate, uptime)*
+
+### Защита
+
+BAL-06. **Щиты, поглощение и регенерация**  
+   *(shield, absorb, regen, effective HP)*
+BAL-07. **Контроль и его убывающая отдача**  
+   *(CC, diminishing returns, immunity, PvP)*
+BAL-08. **Бюджет живучести: стаки смягчения и капы**  
+   *(stacking, diminishing returns, caps, budget)*
+
+### Прогрессия
+
+BAL-09. **Кривая опыта и стоимость уровня**  
+   *(XP, curve, level cap, exponent)* · 🎮 demo
+BAL-10. **Рост характеристик: линейный, геометрический и мягкие капы**  
+   *(stat growth, power curve, scaling, caps)*
+BAL-11. **Мягкие капы и убывающая отдача**  
+   *(soft cap, diminishing returns, curve, stats)*
+BAL-12. **Бюджет очков: деревья навыков и цена выбора**  
+   *(skill tree, budget, opportunity cost, build)*
+BAL-13. **Темп прогрессии: гейты, время до уровня и кривая силы**  
+   *(pacing, gates, retention, power curve)*
+
+### Награды и экономика
+
+BAL-14. **Награда за действие: опыт, добыча и масштабирование**  
+   *(reward, scaling, economy of time, quests)*
+BAL-15. **Полосы редкости и таблицы дропа**  
+   *(loot table, rarity, weights, item level)* · 🎮 demo
+BAL-16. **Гача: вероятности, soft pity и ожидаемые попытки**  
+   *(gacha, pity, expected value, monetisation)* · 🎮 demo
+BAL-17. **Валюты: краны, стоки и скорость накопления**  
+   *(currency, faucet, sink, economy)*
+BAL-18. **Инфляция и sinks в живой экономике**  
+   *(inflation, sink, money supply, live ops)* · 🎮 demo
+BAL-19. **Гринд, энергия и сессионные циклы**  
+   *(grind, session, energy, retention)*
+
+### Мета-баланс
+
+BAL-20. **Степенной рост силы и горизонтальная прогрессия**  
+   *(power creep, progression, content, live ops)*
+BAL-21. **Кривая сложности, DDA и доступность**  
+   *(difficulty, DDA, accessibility, onboarding)*
+BAL-22. **Тюнинг босса: фазы, DPS-check и энрейдж**  
+   *(boss, phases, DPS check, enrage)*
+BAL-23. **PvP-баланс: нормализация, рейтинг и снаряжение**  
+   *(PvP, normalisation, rating, gear)*
+BAL-24. **Симуляция баланса, Монте-Карло и A/B-тесты**  
+   *(Monte Carlo, simulation, A/B test, telemetry)* · 🎮 demo
+
+## Часть V — атлас жанров / Part V — the genre atlas
+
+> 36 жанров: ядро цикла, темп, типичные провалы и игры, в которых жанр виден.
+
+### Экшен
+
+GEN-01. **Шутер от первого лица**  
+   *(aim, TTK, map control, gun feel)* — Сессия: спавн → ротация → дуэль → смерть/победа → спавн   ·   TTK 0.15–1.2 с
+GEN-02. **Battle royale**  
+   *(shrinking, loot, risk, one life)* — Матч: 100 → 1 за T ≈ 15–25 мин,   P(выжить) ≈ (1/2)^(стычек)
+GEN-03. **Файтинг**  
+   *(frame data, neutral, mixup, determinism)* — input → frame N: startup, active, recovery;   advantage = (hit/block stun) − recovery
+GEN-04. **Платформер**  
+   *(jump arc, coyote time, level design, feel)* — h = v₀²/(2g),   t_air = 2v₀/g,   дальность = v₀ₓ · t_air
+GEN-05. **Скролл-шутер и bullet hell**  
+   *(pattern, hitbox, score, reading)* — узоры: ρ(θ) = a + b·sin(kθ + φt),   скорость пули v = const
+GEN-06. **Hack & slash и character action**  
+   *(combo, enemy design, rank, camera)* — DPS_стиля = Σ урон · множитель_комбо / время,   телеграф 0.3–0.6 с
+
+### Стратегии
+
+GEN-07. **Стратегия в реальном времени**  
+   *(economy, map control, counters, APM)* — доход = Σ рабочих · скорость добычи · (1 − потери),   армия(t) = ∫(доход − расход)dt
+GEN-08. **Пошаговая стратегия и 4X**  
+   *(explore, expand, exploit, exterminate)* — рост = (наука · производство · территория)^(1/3) · бонус_эры,   цена расширения ∝ n^1.5
+GEN-09. **MOBA**  
+   *(lanes, snowball, team, roles)* — золото(t) = фарм + баунти − смерти,   окно_силы = тир предметов × уровень
+GEN-10. **Tower defense**  
+   *(pathing, economy, waves, scaling)* — DPS_позиции = Σ башен / время в зоне,   доход(w) = base · (1 + k)^w,   HP(w) = hp₀ · (1 + k')^w
+GEN-11. **Автобаттлер**  
+   *(draft, economy, synergy, RNG)* — доход = base_per_round + floor(gold/10) · 1 (макс 5),   сила = Σ юнитов · синергии
+GEN-12. **Тактические игры и варгеймы**  
+   *(initiative, cover, fog of war, permadeath)* — hit = clamp(0.05, base + acc − cover − range, 0.95),   действия = 1–2 на юнита
+
+### Ролевые игры
+
+GEN-13. **JRPG**  
+   *(party, turn order, story, growth)* — урон = (ATK² / (ATK + DEF)) · элемент · (1 + бафф) · rand(0.9, 1.1)
+GEN-14. **CRPG**  
+   *(dialogue, builds, choice, systems)* — успех ⇔ d20 + мод ≥ DC,   P = (21 − (DC − мод)) / 20
+GEN-15. **Action RPG и looter shooter**  
+   *(loot, builds, density, endgame)* — DPS_билда = урон · скорость · крит · (1 + синергии),   апгрейд = max(0, ilvl_new − ilvl_old)
+GEN-16. **MMO**  
+   *(social, persistence, roles, endgame)* — прогресс = контент(сезон) / (время · обязательные_активности),   группа = танк + хилер + 3 dps
+GEN-17. **Souls-like**  
+   *(stamina, telegraph, risk, world)* — stamina(t) = max(0, stamina₀ − Σcost + regen·t),   урон_блока = урон · (1 − block) − stamina_cost
+GEN-18. **Roguelike и roguelite**  
+   *(procedural, permadeath, synergy, runs)* — P(победного прогона) ≈ f(синергии, скилл),   длина прогона 20–60 мин
+
+### Симуляции
+
+GEN-19. **Симулятор менеджмента и тайкун**  
+   *(economy, optimisation, feedback, spreadsheets)* — прибыль = Σ (цена − себестоимость) · объём − постоянные,   рост = k · (1 − загрузка)
+GEN-20. **Градостроительный симулятор**  
+   *(zoning, traffic, services, growth)* — население' = приток − отток,   приток ∝ счастье · жильё · работа · доступность
+GEN-21. **Фабрика и автоматизация**  
+   *(throughput, ratios, blueprints, scaling)* — throughput = min(производство, потребление, логистика),   ratio = t_produce / t_consume
+GEN-22. **Симулятор жизни и социальные симуляции**  
+   *(needs, relationships, routine, emergence)* — энергия(t) = Σ потребности,   действие = f(время, стоимость, настроение)
+GEN-23. **Сурвайвал**  
+   *(resources, threat, crafting, bases)* — выживание ⇔ запас(t) > потребление(t),   угроза(t) ≈ k · прогресс(t)
+GEN-24. **Песочница и творческие игры**  
+   *(creation, tools, sharing, no goals)* — выразительность = мощность_инструментов / трение_интерфейса
+
+### Приключения
+
+GEN-25. **Метроидвания**  
+   *(gating, backtracking, map, abilities)* — мир = граф комнат,   ребро открыто ⇔ способность ∈ инвентарь
+GEN-26. **Головоломки**  
+   *(rules, insight, levels, teaching)* — сложность ≈ число доступных ходов + глубина следствий
+GEN-27. **Immersive sim**  
+   *(systemic, emergent, stealth, choice)* — решения = комбинации(правил, инструментов, среды)
+GEN-28. **Стелс**  
+   *(visibility, sound, patrol, failure)* — обнаружение ⇔ видимость · свет · расстояние / укрытие + шум > порог
+GEN-29. **Хоррор**  
+   *(tension, powerlessness, sound, pacing)* — напряжение(t) = нехватка_контроля · неопределённость / привыкание
+GEN-30. **Нарративные приключения**  
+   *(story, choice, dialogue, pacing)* — агентность ≈ (влияние выбора) · (видимость последствий)
+
+### Спорт и социальные игры
+
+GEN-31. **Гоночные игры**  
+   *(physics, tracks, sense of speed, progression)* — v_max ≈ P / (ρ·C_d·A)^(1/3),   сцепление = μ·N,   тормозной путь ≈ v²/(2μg)
+GEN-32. **Спортивные симуляторы**  
+   *(rules, season, ratings, meta)* — rating ≈ f(статистика, позиция, контекст),   итог матча = правила + состав + исполнение
+GEN-33. **Ритм-игры**  
+   *(timing, charting, calibration, flow)* — оценка = f(|t_нажатия − t_ноты|),   Perfect ≤ 30 мс, Great ≤ 80 мс
+GEN-34. **Коллекционные карточные игры**  
+   *(deck building, mana curve, meta, RNG)* — темп = Σ (мана / ход),   вероятность добрать ответ = 1 − C(n−k, m)/C(n, m)
+GEN-35. **Idle и инкрементальные игры**  
+   *(exponential, prestige, numbers, automation)* — доход = base · Π множителей,   цена(n) = base · 1.15ⁿ,   время до покупки ≈ цена / доход
+GEN-36. **Пати-игры и социальная дедукция**  
+   *(social, bluffing, short rounds, spectators)* — раунд 1–5 мин,   объяснение правил ≤ 60 с,   доля выбывших в любой момент ≤ 25 %
+
+## Часть VI — стиль и студия промптов / Part VI — style and the prompt studio
+
+> 47 атомов стиля в 6 слоях, 8 готовых пресетов и конструктор, который собирает из досье задание для команды или языковой модели (4 формата выдачи).  
+> 47 style atoms in 6 layers, 8 ready-made presets and a composer that turns the dossier into a brief for a team or a language model (4 output formats).
+
+`#part-styles` — живой блок в HTML: атлас, пресеты и конструктор.
 
 ---
 
@@ -596,7 +782,6 @@ NET-22. **Тестирование сети: netem, хаос и нагрузоч
 
 ## Часть II — процедурная генерация / Part II — procedural generation
 
-> Отдельная часть исследования: полный атлас алгоритмов генерации контента.  
 > A separate part of the research: the full atlas of content generation.
 
 ### Noise, fields and sampling
@@ -669,7 +854,6 @@ PG-28. **The AI director: a tension curve and enemy waves**
 
 ## Часть III — сетевое взаимодействие / Part III — networked multiplayer
 
-> Отдельная часть исследования: полный сетевой плейбук, от UDP до операций крупной MMO.  
 > A separate part of the research: the full networking playbook, from UDP to large-MMO operations.
 
 ### Transport and topology
@@ -727,6 +911,173 @@ NET-21. **Operations: metrics, SLOs, traces and live ops**
    *(observability, SLO, metrics, live-ops)*
 NET-22. **Network testing: netem, chaos and load bots**  
    *(netem, chaos, load test, replay)*
+
+## Часть IV — баланс и прогрессия / Part IV — balance and progression
+
+> The numbers that make a game feel the way it feels: damage, defence, the XP curve, rewards and economy.
+
+### Damage
+
+BAL-01. **Armour and the damage mitigation curve**  
+   *(armour, mitigation, time-to-kill, curve)* · 🎮 demo
+BAL-02. **The damage formula: additive and multiplicative layers**  
+   *(damage formula, modifiers, buckets, stacking)*
+BAL-03. **Effective HP, TTK and shots-to-kill**  
+   *(EHP, TTK, STK, breakpoints)* · 🎮 demo
+BAL-04. **Damage variance, hit chance and dispersion**  
+   *(variance, RNG, hit chance, expected value)*
+BAL-05. **Damage over time: stacks, refresh and ticks**  
+   *(DoT, stacking, tick rate, uptime)*
+
+### Defence
+
+BAL-06. **Shields, absorption and regeneration**  
+   *(shield, absorb, regen, effective HP)*
+BAL-07. **Crowd control and diminishing returns**  
+   *(CC, diminishing returns, immunity, PvP)*
+BAL-08. **Survivability budget: stacking mitigation and caps**  
+   *(stacking, diminishing returns, caps, budget)*
+
+### Progression
+
+BAL-09. **The XP curve and the cost of a level**  
+   *(XP, curve, level cap, exponent)* · 🎮 demo
+BAL-10. **Stat growth: linear, geometric and soft caps**  
+   *(stat growth, power curve, scaling, caps)*
+BAL-11. **Soft caps and diminishing returns**  
+   *(soft cap, diminishing returns, curve, stats)*
+BAL-12. **Point budgets: skill trees and the price of choice**  
+   *(skill tree, budget, opportunity cost, build)*
+BAL-13. **Progression pacing: gates, time-to-level and the power curve**  
+   *(pacing, gates, retention, power curve)*
+
+### Rewards and economy
+
+BAL-14. **Reward per action: XP, drops and scaling**  
+   *(reward, scaling, economy of time, quests)*
+BAL-15. **Rarity bands and loot tables**  
+   *(loot table, rarity, weights, item level)* · 🎮 demo
+BAL-16. **Gacha: rates, soft pity and expected pulls**  
+   *(gacha, pity, expected value, monetisation)* · 🎮 demo
+BAL-17. **Currencies: faucets, sinks and the accumulation rate**  
+   *(currency, faucet, sink, economy)*
+BAL-18. **Inflation and sinks in a live economy**  
+   *(inflation, sink, money supply, live ops)* · 🎮 demo
+BAL-19. **Grind, energy and session loops**  
+   *(grind, session, energy, retention)*
+
+### Meta-balance
+
+BAL-20. **Power creep and horizontal progression**  
+   *(power creep, progression, content, live ops)*
+BAL-21. **Difficulty curves, DDA and accessibility**  
+   *(difficulty, DDA, accessibility, onboarding)*
+BAL-22. **Boss tuning: phases, DPS checks and enrage**  
+   *(boss, phases, DPS check, enrage)*
+BAL-23. **PvP balance: normalisation, rating and gear**  
+   *(PvP, normalisation, rating, gear)*
+BAL-24. **Balance simulation, Monte Carlo and A/B tests**  
+   *(Monte Carlo, simulation, A/B test, telemetry)* · 🎮 demo
+
+## Часть V — атлас жанров / Part V — the genre atlas
+
+> 36 genres: the core loop, the tempo, the usual failures and the games where the genre shows.
+
+### Action
+
+GEN-01. **First-person shooter**  
+   *(aim, TTK, map control, gun feel)* — Session: spawn → rotate → duel → death/win → spawn   ·   TTK 0.15–1.2 s
+GEN-02. **Battle royale**  
+   *(shrinking, loot, risk, one life)* — Match: 100 → 1 in T ≈ 15–25 min,   P(survive) ≈ (1/2)^(fights)
+GEN-03. **Fighting game**  
+   *(frame data, neutral, mixup, determinism)* — input → frame N: startup, active, recovery;   advantage = (hit/block stun) − recovery
+GEN-04. **Platformer**  
+   *(jump arc, coyote time, level design, feel)* — h = v₀²/(2g),   t_air = 2v₀/g,   range = v₀ₓ · t_air
+GEN-05. **Shoot 'em up and bullet hell**  
+   *(pattern, hitbox, score, reading)* — patterns: ρ(θ) = a + b·sin(kθ + φt),   bullet speed v = const
+GEN-06. **Hack & slash and character action**  
+   *(combo, enemy design, rank, camera)* — style DPS = Σ damage · combo multiplier / time,   telegraph 0.3–0.6 s
+
+### Strategy
+
+GEN-07. **Real-time strategy**  
+   *(economy, map control, counters, APM)* — income = Σ workers · gather rate · (1 − losses),   army(t) = ∫(income − spending)dt
+GEN-08. **Turn-based strategy and 4X**  
+   *(explore, expand, exploit, exterminate)* — growth = (science · production · territory)^(1/3) · era bonus,   expansion cost ∝ n^1.5
+GEN-09. **MOBA**  
+   *(lanes, snowball, team, roles)* — gold(t) = farm + bounty − deaths,   power window = item tier × level
+GEN-10. **Tower defense**  
+   *(pathing, economy, waves, scaling)* — position DPS = Σ towers / time in zone,   income(w) = base · (1 + k)^w,   HP(w) = hp₀ · (1 + k')^w
+GEN-11. **Auto battler**  
+   *(draft, economy, synergy, RNG)* — income = base_per_round + floor(gold/10) · 1 (max 5),   power = Σ units · synergies
+GEN-12. **Tactical games and wargames**  
+   *(initiative, cover, fog of war, permadeath)* — hit = clamp(0.05, base + acc − cover − range, 0.95),   actions = 1–2 per unit
+
+### Role-playing
+
+GEN-13. **JRPG**  
+   *(party, turn order, story, growth)* — damage = (ATK² / (ATK + DEF)) · element · (1 + buff) · rand(0.9, 1.1)
+GEN-14. **CRPG**  
+   *(dialogue, builds, choice, systems)* — success ⇔ d20 + mod ≥ DC,   P = (21 − (DC − mod)) / 20
+GEN-15. **Action RPG and looter shooter**  
+   *(loot, builds, density, endgame)* — build DPS = damage · speed · crit · (1 + synergies),   upgrade = max(0, ilvl_new − ilvl_old)
+GEN-16. **MMORPG**  
+   *(social, persistence, roles, endgame)* — progress = content(season) / (time · mandatory activities),   group = tank + healer + 3 dps
+GEN-17. **Souls-like**  
+   *(stamina, telegraph, risk, world)* — stamina(t) = max(0, stamina₀ − Σcost + regen·t),   block damage = damage · (1 − block) − stamina_cost
+GEN-18. **Roguelike and roguelite**  
+   *(procedural, permadeath, synergy, runs)* — P(winning run) ≈ f(synergies, skill),   run length 20–60 min
+
+### Simulations
+
+GEN-19. **Management sim and tycoon**  
+   *(economy, optimisation, feedback, spreadsheets)* — profit = Σ (price − cost) · volume − fixed,   growth = k · (1 − load)
+GEN-20. **City builder**  
+   *(zoning, traffic, services, growth)* — population' = inflow − outflow,   inflow ∝ happiness · housing · jobs · access
+GEN-21. **Factory and automation**  
+   *(throughput, ratios, blueprints, scaling)* — throughput = min(production, consumption, logistics),   ratio = t_produce / t_consume
+GEN-22. **Life sim and social simulation**  
+   *(needs, relationships, routine, emergence)* — energy(t) = Σ needs,   action = f(time, cost, mood)
+GEN-23. **Survival**  
+   *(resources, threat, crafting, bases)* — survival ⇔ stock(t) > consumption(t),   threat(t) ≈ k · progress(t)
+GEN-24. **Sandbox and creative games**  
+   *(creation, tools, sharing, no goals)* — expressiveness = tool power / interface friction
+
+### Adventure
+
+GEN-25. **Metroidvania**  
+   *(gating, backtracking, map, abilities)* — world = graph of rooms,   edge open ⇔ ability ∈ inventory
+GEN-26. **Puzzle games**  
+   *(rules, insight, levels, teaching)* — difficulty ≈ available moves + depth of consequences
+GEN-27. **Immersive sim**  
+   *(systemic, emergent, stealth, choice)* — solutions = combinations(rules, tools, environment)
+GEN-28. **Stealth**  
+   *(visibility, sound, patrol, failure)* — detection ⇔ visibility · light · distance / cover + noise > threshold
+GEN-29. **Horror**  
+   *(tension, powerlessness, sound, pacing)* — tension(t) = lack_of_control · uncertainty / habituation
+GEN-30. **Narrative adventure**  
+   *(story, choice, dialogue, pacing)* — agency ≈ (choice impact) · (visible consequences)
+
+### Sports and social games
+
+GEN-31. **Racing games**  
+   *(physics, tracks, sense of speed, progression)* — v_max ≈ P / (ρ·C_d·A)^(1/3),   grip = μ·N,   braking distance ≈ v²/(2μg)
+GEN-32. **Sports games**  
+   *(rules, season, ratings, meta)* — rating ≈ f(statistics, position, context),   result = rules + lineup + execution
+GEN-33. **Rhythm games**  
+   *(timing, charting, calibration, flow)* — grade = f(|t_press − t_note|),   Perfect ≤ 30 ms, Great ≤ 80 ms
+GEN-34. **Collectible card games**  
+   *(deck building, mana curve, meta, RNG)* — tempo = Σ (mana / turn),   P(draw an answer) = 1 − C(n−k, m)/C(n, m)
+GEN-35. **Idle and incremental games**  
+   *(exponential, prestige, numbers, automation)* — income = base · Π multipliers,   cost(n) = base · 1.15ⁿ,   time to buy ≈ cost / income
+GEN-36. **Party games and social deduction**  
+   *(social, bluffing, short rounds, spectators)* — round 1–5 min,   rules explained ≤ 60 s,   eliminated share at any moment ≤ 25 %
+
+## Part VI — style and the prompt studio
+
+> 47 style atoms across 6 layers, 8 ready-made presets and a composer that turns the dossier into a brief for a team or a language model (4 output formats).
+
+`#part-styles` — the live block in the HTML: atlas, presets and composer.
 
 ---
 
@@ -888,6 +1239,9 @@ NET-22. **Network testing: netem, chaos and load bots**
 | 13 | Тяжёлые нагрузки и GPU | Heavy workloads and GPU |
 | 14 | Процедурная генерация | Procedural generation |
 | 15 | Сетевое взаимодействие | Networked multiplayer |
+| 16 | Баланс и прогрессия | Balance and progression |
+| 17 | Атлас жанров | Genre atlas |
+| 18 | Стиль и студия промптов | Style and the prompt studio |
 
 ---
 
