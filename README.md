@@ -4,25 +4,29 @@
 
 > ### 📘 Полное исследование: [game-algorithms-research.html](game-algorithms-research.html)
 > Один автономный HTML-файл (открывается двойным кликом, работает офлайн):
-> **86 тем** с математической моделью, пошаговой реализацией, рабочим кодом,
-> сложностью, типичными ошибками и референсами; **43 интерактивных демо**
+> **104 тем** с математической моделью, пошаговой реализацией, рабочим кодом,
+> сложностью, типичными ошибками и референсами; **55 интерактивных демо**
 > (шум и эрозия, пещеры и подземелья, BSP, лабиринты, WFC, биомы, реки, города,
 > предметы, имена, квесты, музыка, фасады, а также баллистика, boids и lockstep);
 > **45 практических задач** и словарь терминов.
 >
 > **Часть II — процедурная генерация** вынесена в отдельный атлас: 28 тем,
 > 28 живых моделей, четыре слоя — от шума и сэмплинга до контента и драматургии.
+> **Часть III — сетевое взаимодействие**: 22 темы, 13 живых моделей,
+> четыре слоя — транспорт, синхронизация, реальное время и масштаб.
 > Поиск, фильтры по сложности, прогресс чтения, тёмная/светлая темы и переключатель
 > языка — внутри.
 >
 > Исходники контента — `research/`, сборка — `python3 tools/build.py`, стили и демо — `assets/`.
 
 > ### 📗 Full research (English): [index.en.html](index.en.html)
-> The same research in English: **86 topics** with the mathematical model, a
+> The same research in English: **104 topics** with the mathematical model, a
 > step-by-step build, working code, complexity, pitfalls and references;
-> **43 interactive demos**; **45 practical tasks** and a glossary.
+> **55 interactive demos**; **45 practical tasks** and a glossary.
 > **Part II — procedural generation** is a separate atlas: 28 topics, 28 live
 > models, four layers from noise and sampling up to content and drama.
+> **Part III — networked multiplayer**: 22 topics, 13 live models,
+> four layers: transport, synchronisation, real time and scale.
 > A language switch sits in the header and remembers your choice.
 
 **Онлайн / Live:** <https://sergutsu.github.io/Game-algorithms/> — GitHub Pages, корень репозитория, ветка `main`
@@ -50,20 +54,24 @@ python3 tools/gen_readme.py   # обновить этот README
 | `research/topics_*.py` | Часть I, темы RU (1–30, 31–36 оптимизация, 37–57, 58–66 heavy/GPU) |
 | `research/topics_procgen_a.py` | Часть II, слои 01–02: шум, сэмплинг, планировка (RU) |
 | `research/topics_procgen_b.py` | Часть II, слои 03–04: миры, контент, системы (RU) |
+| `research/topics_net_a.py` | Часть III, слои 01–02: транспорт и синхронизация (RU) |
+| `research/topics_net_b.py` | Часть III, слои 03–04: реальное время и масштаб (RU) |
 | `research/topics_en_*.py` | Часть I, темы EN (те же id, английский текст) |
 | `research/topics_en_procgen_*.py` | Часть II на английском |
+| `research/topics_en_net_*.py` | Часть III на английском |
 | `research/appendix_en.py` | 45 практических задач на английском |
 | `research/codes_en.py` | Английские комментарии в примерах кода |
 | `research/i18n.py` | Разделы, подписи интерфейса, словарь, строки оболочки (RU + EN) |
 | `tools/build.py` | Сборщик: `research/*.py` + `assets/` → два HTML |
-| `assets/` | Стили, клиентская логика, 43 демо, таблицы подписей |
+| `assets/` | Стили, клиентская логика, 55 демо, таблицы подписей |
 
 ---
 
 ## 📚 Темы — русская версия
 
 Сначала **Часть I — системы**, затем отдельная **Часть II — атлас процедурной
-генерации** (нумерация PG-01…PG-28).
+генерации** (нумерация PG-01…PG-28) и **Часть III — сетевой плейбук**
+(нумерация NET-01…NET-22).
 
 ### Геймплейные механики
 
@@ -90,17 +98,6 @@ python3 tools/gen_readme.py   # обновить этот README
    *(цепи Маркова, трансформеры, грамматики)*
 10. **Оптимизация группового поведения юнитов**  
    *(теория роя, boids, spatial hash)* · 🎮 demo
-
-### Сетевая синхронизация
-
-16. **Предсказание движения в FPS**  
-   *(фильтр Калмана, экстраполяция, rollback)*
-17. **Система защиты от читеров**  
-   *(z-score, аномалии, доверие)*
-18. **Детерминированная симуляция RTS**  
-   *(fixed-point, детерминизм, lockstep)* · 🎮 demo
-19. **Оптимизация передачи состояния мира**  
-   *(энтропия Шеннона, квантование, дельта)*
 
 ### Физические симуляции
 
@@ -280,6 +277,67 @@ PG-27. **Построение правдоподобных экосистем**
 PG-28. **AI-директор: кривая напряжения и волны врагов**  
    *(AI director, пейсинг, динамическая сложность, волны)* · 🎮 demo
 
+## Часть III — сетевое взаимодействие / Part III — networked multiplayer
+
+> Отдельная часть исследования: полный сетевой плейбук, от UDP до операций крупной MMO.  
+> A separate part of the research: the full networking playbook, from UDP to large-MMO operations.
+
+### Транспорт и топология
+
+NET-01. **Транспорт: UDP, TCP, QUIC и WebTransport**  
+   *(UDP, TCP, QUIC, MTU)* · 🎮 demo
+NET-02. **Надёжность поверх UDP: sequence, ACK, RTO и congestion control**  
+   *(ACK, RTO, congestion, retransmit)* · 🎮 demo
+NET-03. **Топологии: dedicated, listen, P2P, relay и mesh**  
+   *(dedicated, listen, P2P, relay)* · 🎮 demo
+NET-04. **NAT, STUN, TURN, ICE и hole punching**  
+   *(NAT, STUN, TURN, ICE)* · 🎮 demo
+NET-05. **Браузер и мобильные сети: WebSocket, WebRTC и радио**  
+   *(WebSocket, WebRTC, mobile, battery)*
+
+### Модели синхронизации
+
+NET-06. **Детерминированная симуляция RTS**  
+   *(fixed-point, детерминизм, lockstep)* · 🎮 demo
+NET-07. **Предсказание движения в FPS**  
+   *(фильтр Калмана, экстраполяция, rollback)*
+NET-08. **Оптимизация передачи состояния мира**  
+   *(энтропия Шеннона, квантование, дельта)*
+NET-09. **Rollback netcode: пересимуляция для файтингов**  
+   *(rollback, GGPO, prediction, determinism)* · 🎮 demo
+NET-10. **Детерминизм и сериализация: fixed-point, квантование, bitpacking**  
+   *(fixed-point, quantisation, bitpacking, checksum)*
+
+### Реальное время
+
+NET-11. **Интерполяция, экстраполяция и jitter buffer**  
+   *(interpolation, jitter, buffer, snapshots)* · 🎮 demo
+NET-12. **Lag compensation: rewind и валидация попаданий**  
+   *(rewind, hitscan, latency, anti-cheat)* · 🎮 demo
+NET-13. **Interest management: AOI, сетки и relevance**  
+   *(AOI, spatial hash, relevance, MMO)* · 🎮 demo
+NET-14. **Синхронизация времени и тиков: часы, offset и timeline**  
+   *(clock, tick, NTP, timeline)*
+NET-15. **Бюджет полосы: приоритизация, дельты и квантование**  
+   *(bandwidth, priority, delta, quantisation)* · 🎮 demo
+
+### Масштаб и эксплуатация
+
+NET-16. **Шардинг, зоны и бесшовный мир**  
+   *(sharding, zones, handoff, MMO)* · 🎮 demo
+NET-17. **Сессии, лобби, матчмейкинг и reconnect**  
+   *(session, matchmaking, lobby, reconnect)* · 🎮 demo
+NET-18. **Персистентность MMO: БД, кэш, транзакции и event sourcing**  
+   *(database, redis, transactions, event sourcing)*
+NET-19. **Система защиты от читеров**  
+   *(z-score, аномалии, доверие)*
+NET-20. **Безопасность: DDoS, rate limit, auth и шифрование**  
+   *(DDoS, rate limit, auth, encryption)* · 🎮 demo
+NET-21. **Эксплуатация: метрики, SLO, трейсы и live-ops**  
+   *(observability, SLO, metrics, live-ops)*
+NET-22. **Тестирование сети: netem, хаос и нагрузочные боты**  
+   *(netem, chaos, load test, replay)*
+
 ---
 
 ## 🛠 Практические задачи — русская версия
@@ -430,17 +488,6 @@ PG-28. **AI-директор: кривая напряжения и волны в
    *(Markov chains, transformers, grammars)*
 10. **Flocking / boids and crowd steering**  
    *(flocking theory, boids, spatial hash)* · 🎮 demo
-
-### Network synchronisation
-
-16. **Client-side prediction and interpolation**  
-   *(Kalman filter, extrapolation, rollback)*
-17. **Anti-cheat: statistical anomaly detection**  
-   *(z-score, anomalies, trust)*
-18. **Deterministic lockstep simulation**  
-   *(fixed-point, determinism, lockstep)* · 🎮 demo
-19. **Snapshot compression and delta encoding**  
-   *(Shannon entropy, quantisation, delta)*
 
 ### Physical simulations
 
@@ -620,6 +667,67 @@ PG-27. **Lotka–Volterra ecosystems**
 PG-28. **The AI director: a tension curve and enemy waves**  
    *(AI director, pacing, dynamic difficulty, waves)* · 🎮 demo
 
+## Часть III — сетевое взаимодействие / Part III — networked multiplayer
+
+> Отдельная часть исследования: полный сетевой плейбук, от UDP до операций крупной MMO.  
+> A separate part of the research: the full networking playbook, from UDP to large-MMO operations.
+
+### Transport and topology
+
+NET-01. **Transport: UDP, TCP, QUIC and WebTransport**  
+   *(UDP, TCP, QUIC, MTU)* · 🎮 demo
+NET-02. **Reliability over UDP: sequence, ACK, RTO and congestion control**  
+   *(ACK, RTO, congestion, retransmit)* · 🎮 demo
+NET-03. **Topologies: dedicated, listen, P2P, relay and mesh**  
+   *(dedicated, listen, P2P, relay)* · 🎮 demo
+NET-04. **NAT, STUN, TURN, ICE and hole punching**  
+   *(NAT, STUN, TURN, ICE)* · 🎮 demo
+NET-05. **Browsers and mobile networks: WebSocket, WebRTC and radio**  
+   *(WebSocket, WebRTC, mobile, battery)*
+
+### Synchronisation models
+
+NET-06. **Deterministic lockstep simulation**  
+   *(fixed-point, determinism, lockstep)* · 🎮 demo
+NET-07. **Client-side prediction and interpolation**  
+   *(Kalman filter, extrapolation, rollback)*
+NET-08. **Snapshot compression and delta encoding**  
+   *(Shannon entropy, quantisation, delta)*
+NET-09. **Rollback netcode: resimulation for fighting games**  
+   *(rollback, GGPO, prediction, determinism)* · 🎮 demo
+NET-10. **Determinism and serialisation: fixed point, quantisation, bit packing**  
+   *(fixed-point, quantisation, bitpacking, checksum)*
+
+### Real-time techniques
+
+NET-11. **Interpolation, extrapolation and jitter buffers**  
+   *(interpolation, jitter, buffer, snapshots)* · 🎮 demo
+NET-12. **Lag compensation: rewind and hit validation**  
+   *(rewind, hitscan, latency, anti-cheat)* · 🎮 demo
+NET-13. **Interest management: AOI, grids and relevance**  
+   *(AOI, spatial hash, relevance, MMO)* · 🎮 demo
+NET-14. **Clock and tick synchronisation: offsets, ticks and timelines**  
+   *(clock, tick, NTP, timeline)*
+NET-15. **Bandwidth budget: prioritisation, deltas and quantisation**  
+   *(bandwidth, priority, delta, quantisation)* · 🎮 demo
+
+### Scale and operations
+
+NET-16. **Sharding, zones and seamless worlds**  
+   *(sharding, zones, handoff, MMO)* · 🎮 demo
+NET-17. **Sessions, lobbies, matchmaking and reconnect**  
+   *(session, matchmaking, lobby, reconnect)* · 🎮 demo
+NET-18. **MMO persistence: databases, caches, transactions and event sourcing**  
+   *(database, redis, transactions, event sourcing)*
+NET-19. **Anti-cheat: statistical anomaly detection**  
+   *(z-score, anomalies, trust)*
+NET-20. **Security: DDoS, rate limits, auth and encryption**  
+   *(DDoS, rate limit, auth, encryption)* · 🎮 demo
+NET-21. **Operations: metrics, SLOs, traces and live ops**  
+   *(observability, SLO, metrics, live-ops)*
+NET-22. **Network testing: netem, chaos and load bots**  
+   *(netem, chaos, load test, replay)*
+
 ---
 
 ## 🛠 Practical tasks — English version
@@ -768,18 +876,18 @@ PG-28. **The AI director: a tension curve and enemy waves**
 | 1 | Геймплейные механики | Gameplay mechanics |
 | 2 | Искусственный интеллект | Artificial intelligence |
 | 3 | Компьютерная графика | Computer graphics |
-| 4 | Сетевая синхронизация | Network synchronisation |
-| 5 | Физические симуляции | Physical simulations |
-| 6 | Системы оптимизации | Optimisation systems |
-| 7 | Математические механики | Mathematical mechanics |
-| 8 | Статистика и баланс | Statistics and balance |
-| 9 | Геометрия и коллизии | Geometry and collisions |
-| 10 | Шейдеры и GPU | Shaders and GPU |
-| 11 | Игровые экономики | Game economies |
-| 12 | Аудио-системы | Audio systems |
-| 13 | Нейросетевые приложения | Neural network applications |
-| 14 | Тяжёлые нагрузки и GPU | Heavy workloads and GPU |
-| 15 | Процедурная генерация | Procedural generation |
+| 4 | Физические симуляции | Physical simulations |
+| 5 | Системы оптимизации | Optimisation systems |
+| 6 | Математические механики | Mathematical mechanics |
+| 7 | Статистика и баланс | Statistics and balance |
+| 8 | Геометрия и коллизии | Geometry and collisions |
+| 9 | Шейдеры и GPU | Shaders and GPU |
+| 10 | Игровые экономики | Game economies |
+| 11 | Аудио-системы | Audio systems |
+| 12 | Нейросетевые приложения | Neural network applications |
+| 13 | Тяжёлые нагрузки и GPU | Heavy workloads and GPU |
+| 14 | Процедурная генерация | Procedural generation |
+| 15 | Сетевое взаимодействие | Networked multiplayer |
 
 ---
 

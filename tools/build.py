@@ -26,14 +26,16 @@ from topics_6 import TOPICS_6  # noqa: E402
 from topics_7 import TOPICS_7  # noqa: E402
 from topics_procgen_a import TOPICS_PG_A  # noqa: E402
 from topics_procgen_b import TOPICS_PG_B  # noqa: E402
+from topics_net_a import TOPICS_NET_A  # noqa: E402
+from topics_net_b import TOPICS_NET_B  # noqa: E402
 from i18n import (  # noqa: E402
     CATS, CHAPTER_ORDER, DEMO_TITLES, GLOSSARY, LEVEL_LABEL,
     LEVELS_HINT, PARTS, PART_OF, PG_DECISIONS, PG_GROUP_ORDER, PG_GROUPS,
-    PG_ORDER, STRINGS,
+    PG_ORDER, STRINGS, NET_DECISIONS, NET_GROUP_ORDER, NET_GROUPS, NET_ORDER,
 )
 
 RU_TOPICS = (TOPICS_1 + TOPICS_2 + TOPICS_3 + TOPICS_4 + TOPICS_5 + TOPICS_6 +
-             TOPICS_7 + TOPICS_PG_A + TOPICS_PG_B)
+             TOPICS_7 + TOPICS_PG_A + TOPICS_PG_B + TOPICS_NET_A + TOPICS_NET_B)
 
 # английские версии подключаются опционально: если файла нет — остаётся русский текст
 EN_TOPICS = []
@@ -46,7 +48,9 @@ for _mod in ("topics_en_1", "topics_en_2", "topics_en_3",
     EN_TOPICS.extend(getattr(_m, "TOPICS_EN_" + _mod.split("_")[-1], []))
 
 for _mod, _attr in (("topics_en_procgen_a", "TOPICS_EN_PG_A"),
-                    ("topics_en_procgen_b", "TOPICS_EN_PG_B")):
+                    ("topics_en_procgen_b", "TOPICS_EN_PG_B"),
+                    ("topics_en_net_a", "TOPICS_EN_NET_A"),
+                    ("topics_en_net_b", "TOPICS_EN_NET_B")):
     try:
         _m = importlib.import_module(_mod)
     except ImportError:
@@ -124,11 +128,26 @@ def merge_topics(ru_list, en_list):
 
 
 PG_RANK = {tid: i for i, tid in enumerate(PG_ORDER)}
+NET_RANK = {tid: i for i, tid in enumerate(NET_ORDER)}
+
+# конфигурация частей: одна и та же разметка, разные данные
+PART_CONFIG = {
+    "procgen": {
+        "cat": "procgen", "prefix": "PG", "field": "pg", "numeral": "II",
+        "groups": PG_GROUPS, "group_order": PG_GROUP_ORDER, "decisions": PG_DECISIONS,
+        "rank": PG_RANK, "nav_short": "nav_procgen_short", "hero": "hero_procgen",
+    },
+    "network": {
+        "cat": "network", "prefix": "NET", "field": "nl", "numeral": "III",
+        "groups": NET_GROUPS, "group_order": NET_GROUP_ORDER, "decisions": NET_DECISIONS,
+        "rank": NET_RANK, "nav_short": "nav_network_short", "hero": "hero_network",
+    },
+}
 
 
-def pg_order(items):
-    """Темы части II идут в порядке PG_ORDER (он же задаёт номера PG-01…)."""
-    return sorted(items, key=lambda t: (PG_RANK.get(t["id"], 10_000), t["n"]))
+def part_order(items, cfg):
+    """Темы части идут в порядке *_ORDER (он же задаёт номера PG-/NET-)."""
+    return sorted(items, key=lambda t: (cfg["rank"].get(t["id"], 10_000), t["n"]))
 
 
 def build_chapters(topics):
@@ -136,7 +155,10 @@ def build_chapters(topics):
     chapters = []
     for cat in CHAPTER_ORDER:
         items = [t for t in topics if cat_of(t) == cat]
-        items = pg_order(items) if cat == "procgen" else sorted(items, key=lambda t: t["n"])
+        if cat in PART_OF:
+            items = part_order(items, PART_CONFIG[cat])
+        else:
+            items = sorted(items, key=lambda t: t["n"])
         if items:
             chapters.append((cat, items))
     return chapters
@@ -214,14 +236,14 @@ def demo_block(name, color, lang):
         </figure>'''
 
 
-def render_topic(t, total, lang, shown=None, part_total=None):
+def render_topic(t, total, lang, shown=None, part_total=None, part_no="II"):
     cat = cat_of(t)
     name, _desc = CATS[cat][lang]
     color = CATS[cat]["color"]
     n = t["n"]
     num_text = shown or ("%02d" % n)
-    glyph = num_text.split("-")[-1] if num_text.startswith("PG-") else num_text
-    of_text = (S("topic_part_of", lang, n=num_text, total=part_total)
+    glyph = num_text.split("-")[-1] if "-" in num_text else num_text
+    of_text = (S("topic_part_of", lang, n=num_text, total=part_total, part=part_no)
                if part_total else S("topic_of", lang, n=num_text, total=total))
     tags = "".join(f'<span class="tag">{esc(x)}</span>' for x in t["tags"])
     detail = "".join(f"<p>{p}</p>" for p in t["detail"])
@@ -308,23 +330,134 @@ def render_topic(t, total, lang, shown=None, part_total=None):
 # assemble
 # --------------------------------------------------------------------------
 
-def pg_display_map(part_items):
-    """PG-01…PG-NN — сквозная нумерация внутри части II."""
-    return {t["id"]: "PG-%02d" % (i + 1) for i, t in enumerate(part_items)}
+def part_display_map(items, prefix):
+    """PG-01… / NET-01… — сквозная нумерация внутри части."""
+    return {t["id"]: "%s-%02d" % (prefix, i + 1) for i, t in enumerate(items)}
+
+
+def render_part(key, items, lang, total):
+    """Hero + атлас + таблица выбора + слои одной части (II или III)."""
+    cfg = PART_CONFIG[key]
+    meta = PARTS[key]
+    color = CATS[cfg["cat"]]["color"]
+    no = part_display_map(items, cfg["prefix"])
+    default = cfg["group_order"][0]
+    present = [g for g in cfg["group_order"]
+               if any(t.get(cfg["field"], default) == g for t in items)]
+    layers = len(present)
+    demos = len({t["demo"] for t in items if t.get("demo")})
+    guide_title = meta.get("guide_title", {}).get(lang) or S("part_guide_title", lang)
+    guide_hint = meta.get("guide_hint", {}).get(lang) or S("part_guide_hint", lang)
+    guide_note = meta.get("guide_note", {}).get(lang) or S("part_guide_note", lang)
+
+    atlas = []
+    for gkey in present:
+        gitems = [t for t in items if t.get(cfg["field"], default) == gkey]
+        gname = cfg["groups"][gkey][lang][0]
+        gcolor = cfg["groups"][gkey]["color"]
+        chips = "".join(f'''
+            <a class="pg-chip" href="#{t["id"]}" style="--cat:{gcolor}">
+              <span class="no">{no[t["id"]]}</span>
+              <span class="t">{esc(t["title"])}<span class="s">{esc(" · ".join(t["tags"][:2]))}</span></span>
+              <span class="lvl">L{t["level"]}</span>
+            </a>''' for t in gitems)
+        atlas.append(f'''
+        <div class="pg-group">
+          <div class="pg-group-head">
+            <span class="no" style="--cat:{gcolor}">{cfg["groups"][gkey]["num"]}</span>
+            <h4>{esc(gname)}</h4>
+            <span class="rule"></span>
+            <span class="count">{len(gitems):02d}</span>
+          </div>
+          <div class="pg-atlas-grid">{chips}</div>
+        </div>''')
+
+    guide_rows = "".join(
+        f"<tr><td>{esc(d[lang][0])}</td><td>{esc(d[lang][1])}</td></tr>"
+        for d in cfg["decisions"]
+    )
+
+    body = []
+    for gkey in present:
+        gitems = [t for t in items if t.get(cfg["field"], default) == gkey]
+        gname, gdesc = cfg["groups"][gkey][lang]
+        gcolor = cfg["groups"][gkey]["color"]
+        body.append(f'''
+      <div class="pg-layer" data-layer="{gkey}">
+      <div class="subpart" id="part-{key}-{gkey}" style="--cat:{gcolor}">
+        <span class="no">{cfg["groups"][gkey]["num"]}</span>
+        <h4>{esc(gname)}</h4>
+        <span class="rule"></span>
+        <span class="count">{esc(S("part_group_topics", lang, n=len(gitems)))}</span>
+      </div>
+      <p class="subpart-intro">{esc(gdesc)}</p>''')
+        body.append("".join(render_topic(t, total, lang, no[t["id"]], len(items),
+                                         part_no=cfg["numeral"]) for t in gitems))
+        body.append("      </div>")
+
+    return f'''
+    <section class="chapter-block part-block" id="part-{key}" data-chapter="{cfg["cat"]}"
+             data-part="{key}" style="--cat:{color};--part:{color}">
+      <header class="part-hero">
+        <span class="kicker">{esc(meta["kicker"][lang])}</span>
+        <h2>{esc(meta["title"][lang])}</h2>
+        <div class="sub">{esc(meta["subtitle"][lang])}</div>
+        <p class="lede">{esc(meta["lede"][lang])}</p>
+        <div class="stats">
+          <div class="pstat"><b>{len(items)}</b><span>{esc(S("part_stat_topics", lang))}</span></div>
+          <div class="pstat"><b>{demos}</b><span>{esc(S("part_stat_demos", lang))}</span></div>
+          <div class="pstat"><b>{layers}</b><span>{esc(S("part_stat_layers", lang))}</span></div>
+          <div class="pstat"><b>{len(cfg["decisions"])}</b><span>{esc(S("part_stat_guide", lang))}</span></div>
+        </div>
+        <p class="note">{esc(meta["note"][lang])}</p>
+      </header>
+
+      <div class="part-atlas">
+        <div class="part-atlas-head">
+          <h3>{esc(S("part_atlas_title", lang))}</h3>
+          <span>{esc(S("part_atlas_hint", lang))}</span>
+        </div>{"".join(atlas)}
+      </div>
+
+      <div class="pg-guide">
+        <div class="pg-guide-head">
+          <h3>{esc(guide_title)}</h3>
+          <span>{esc(guide_hint)}</span>
+        </div>
+        <table><tbody>{guide_rows}</tbody></table>
+        <p class="note">{esc(guide_note)}</p>
+      </div>
+      {"".join(body)}
+    </section>'''
 
 
 def build_page(lang, topics, appendix, css, js):
     chapters_all = build_chapters(topics)
     chapters = [(c, items) for c, items in chapters_all if c not in PART_OF]
-    part_items = next((items for c, items in chapters_all if c in PART_OF), [])
-    pg_no = pg_display_map(part_items)
+    parts = [(key, items) for key, cfg in PART_CONFIG.items()
+             for c, items in chapters_all if c == cfg["cat"]]
     total = len(topics)
     counts = {}
     for t in topics:
         counts[cat_of(t)] = counts.get(cat_of(t), 0) + 1
-    pg_groups = [g for g in PG_GROUP_ORDER
-                 if any(t.get("pg", "foundation") == g for t in part_items)]
-    pg_demos = len({t["demo"] for t in part_items if t.get("demo")})
+
+    part_nav = "".join(
+        f'<a href="#part-{key}" style="color:{CATS[cfg["cat"]]["color"]}">'
+        f'{esc(S(cfg["nav_short"], lang))}</a>'
+        for key, items in parts for cfg in [PART_CONFIG[key]]
+    )
+    hero_part_buttons = "".join(
+        f"""<a class="btn" href="#part-{key}"
+           style="border-color:color-mix(in srgb, {CATS[cfg["cat"]]["color"]} 45%, transparent);
+                  color:{CATS[cfg["cat"]]["color"]}">{esc(S(cfg["hero"], lang))}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>"""
+        for key, items in parts for cfg in [PART_CONFIG[key]]
+    )
+    footer_part_links = "".join(
+        f'<a href="#part-{key}">{esc(S("nav_" + key, lang))} <span>→</span></a>'
+        for key, items in parts
+    )
 
     # sidebar table of contents
     toc = []
@@ -346,18 +479,21 @@ def build_page(lang, topics, appendix, css, js):
           <ul class="toc-list">{links}</ul>
         </details>''')
 
-    if part_items:
-        part_color = CATS["procgen"]["color"]
-        part_name = CATS["procgen"][lang][0]
+    for key, items in parts:
+        cfg = PART_CONFIG[key]
+        color = CATS[cfg["cat"]]["color"]
+        name = CATS[cfg["cat"]][lang][0]
+        no = part_display_map(items, cfg["prefix"])
+        default = cfg["group_order"][0]
         sub = []
-        for gkey in pg_groups:
-            gitems = [t for t in part_items if t.get("pg", "foundation") == gkey]
+        for gkey in cfg["group_order"]:
+            gitems = [t for t in items if t.get(cfg["field"], default) == gkey]
             if not gitems:
                 continue
-            gname = PG_GROUPS[gkey][lang][0]
+            gname = cfg["groups"][gkey][lang][0]
             glinks = "".join(
-                f'<li><a href="#{t["id"]}" data-cat="procgen" data-level="{t["level"]}">'
-                f'<span class="no">{pg_no[t["id"]]}</span><span>{esc(t["title"])}</span></a></li>'
+                f'<li><a href="#{t["id"]}" data-cat="{cfg["cat"]}" data-level="{t["level"]}">'
+                f'<span class="no">{no[t["id"]]}</span><span>{esc(t["title"])}</span></a></li>'
                 for t in gitems
             )
             sub.append(f'''
@@ -368,10 +504,10 @@ def build_page(lang, topics, appendix, css, js):
         toc.append(f'''
         <details class="toc-group toc-part" open>
           <summary>
-            <span class="swatch" style="background:{part_color}"></span>
-            <span>{esc(part_name)}</span>
-            <span class="count">{len(part_items):02d}</span>
-          </summary>{"" .join(sub)}
+            <span class="swatch" style="background:{color}"></span>
+            <span>{esc(name)}</span>
+            <span class="count">{len(items):02d}</span>
+          </summary>{"".join(sub)}
         </details>''')
 
     cat_options = "".join(
@@ -379,7 +515,7 @@ def build_page(lang, topics, appendix, css, js):
         for cid in CHAPTER_ORDER if counts.get(cid)
     )
 
-    # knowledge map: Part I chapters + a wide Part II card
+    # knowledge map: Part I chapters + wide cards for the parts
     map_cards = []
     for idx, (cat, items) in enumerate(chapters, 1):
         name, desc = CATS[cat][lang]
@@ -395,17 +531,19 @@ def build_page(lang, topics, appendix, css, js):
           <p>{esc(desc)}</p>
           <div class="bar" style="background:linear-gradient(90deg,{color},{color}00)"></div>
         </a>''')
-    if part_items:
-        part_color = CATS["procgen"]["color"]
-        pmeta = PARTS["procgen"]
+    for key, items in parts:
+        cfg = PART_CONFIG[key]
+        color = CATS[cfg["cat"]]["color"]
+        pmeta = PARTS[key]
         map_cards.append(f'''
-        <a class="map-card part-card" href="#part-procgen" style="--cat:{part_color}">
+        <a class="map-card part-card" href="#part-{key}" data-part="{key}"
+           style="--cat:{color};--part:{color}">
           <div class="top">
             <span class="name">{esc(pmeta["title"][lang])}</span>
-            <span class="n">PG-01–{len(part_items):02d}</span>
+            <span class="n">{cfg["prefix"]}-01–{len(items):02d}</span>
           </div>
           <p>{esc(pmeta["subtitle"][lang])} · {esc(pmeta["kicker"][lang])}</p>
-          <div class="bar" style="background:linear-gradient(90deg,{part_color},{part_color}00)"></div>
+          <div class="bar" style="background:linear-gradient(90deg,{color},{color}00)"></div>
         </a>''')
 
     chapter_html = []
@@ -424,96 +562,8 @@ def build_page(lang, topics, appendix, css, js):
       {body}
     </section>''')
 
-    # ------------------------------------------------------------------
-    # Part II — procedural generation
-    # ------------------------------------------------------------------
-    if part_items:
-        pmeta = PARTS["procgen"]
-        part_color = CATS["procgen"]["color"]
-        layers = len(pg_groups)
-        atlas = []
-        for gkey in pg_groups:
-            gitems = [t for t in part_items if t.get("pg", "foundation") == gkey]
-            if not gitems:
-                continue
-            gname = PG_GROUPS[gkey][lang][0]
-            gcolor = PG_GROUPS[gkey]["color"]
-            chips = "".join(f'''
-            <a class="pg-chip" href="#{t["id"]}" style="--cat:{gcolor}">
-              <span class="no">{pg_no[t["id"]]}</span>
-              <span class="t">{esc(t["title"])}<span class="s">{esc(" · ".join(t["tags"][:2]))}</span></span>
-              <span class="lvl">L{t["level"]}</span>
-            </a>''' for t in gitems)
-            atlas.append(f'''
-        <div class="pg-group">
-          <div class="pg-group-head">
-            <span class="no" style="--cat:{gcolor}">{PG_GROUPS[gkey]["num"]}</span>
-            <h4>{esc(gname)}</h4>
-            <span class="rule"></span>
-            <span class="count">{len(gitems):02d}</span>
-          </div>
-          <div class="pg-atlas-grid">{chips}</div>
-        </div>''')
-
-        guide_rows = "".join(
-            f"<tr><td>{esc(d[lang][0])}</td><td>{esc(d[lang][1])}</td></tr>"
-            for d in PG_DECISIONS
-        )
-
-        body = []
-        for gkey in pg_groups:
-            gitems = [t for t in part_items if t.get("pg", "foundation") == gkey]
-            if not gitems:
-                continue
-            gname, gdesc = PG_GROUPS[gkey][lang]
-            gcolor = PG_GROUPS[gkey]["color"]
-            body.append(f'''
-      <div class="pg-layer" data-layer="{gkey}">
-      <div class="subpart" id="part-{gkey}" style="--cat:{gcolor}">
-        <span class="no">{PG_GROUPS[gkey]["num"]}</span>
-        <h4>{esc(gname)}</h4>
-        <span class="rule"></span>
-        <span class="count">{esc(S("part_group_topics", lang, n=len(gitems)))}</span>
-      </div>
-      <p class="subpart-intro">{esc(gdesc)}</p>''')
-            body.append("".join(render_topic(t, total, lang, pg_no[t["id"]], len(part_items))
-                                for t in gitems))
-            body.append("      </div>")
-
-        chapter_html.append(f'''
-    <section class="chapter-block part-block" id="part-procgen" data-chapter="procgen"
-             style="--cat:{part_color}">
-      <header class="part-hero">
-        <span class="kicker">{esc(pmeta["kicker"][lang])}</span>
-        <h2>{esc(pmeta["title"][lang])}</h2>
-        <div class="sub">{esc(pmeta["subtitle"][lang])}</div>
-        <p class="lede">{esc(pmeta["lede"][lang])}</p>
-        <div class="stats">
-          <div class="pstat"><b>{len(part_items)}</b><span>{esc(S("part_stat_topics", lang))}</span></div>
-          <div class="pstat"><b>{pg_demos}</b><span>{esc(S("part_stat_demos", lang))}</span></div>
-          <div class="pstat"><b>{layers}</b><span>{esc(S("part_stat_layers", lang))}</span></div>
-          <div class="pstat"><b>{len(PG_DECISIONS)}</b><span>{esc(S("part_stat_guide", lang))}</span></div>
-        </div>
-        <p class="note">{esc(pmeta["note"][lang])}</p>
-      </header>
-
-      <div class="part-atlas">
-        <div class="part-atlas-head">
-          <h3>{esc(S("part_atlas_title", lang))}</h3>
-          <span>{esc(S("part_atlas_hint", lang))}</span>
-        </div>{"" .join(atlas)}
-      </div>
-
-      <div class="pg-guide">
-        <div class="pg-guide-head">
-          <h3>{esc(S("part_guide_title", lang))}</h3>
-          <span>{esc(S("part_guide_hint", lang))}</span>
-        </div>
-        <table><tbody>{guide_rows}</tbody></table>
-        <p class="note">{esc(S("part_guide_note", lang))}</p>
-      </div>
-      {"".join(body)}
-    </section>''')
+    for key, items in parts:
+        chapter_html.append(render_part(key, items, lang, total))
 
     # appendix
     appx_html = []
@@ -592,7 +642,7 @@ def build_page(lang, topics, appendix, css, js):
     <a href="#map">{esc(S("nav_map", lang))}</a>
     <a href="#appendix">{esc(S("nav_practice", lang))}</a>
     <a href="#glossary">{esc(S("nav_glossary", lang))}</a>
-    <a href="#part-procgen" style="color:var(--mint)">{esc(S("nav_procgen_short", lang))}</a>
+    {part_nav}
   </nav>
   <a class="icon-btn lang-btn" href="{other_file}" data-lang-switch="{other_lang}" hreflang="{other_lang}"
      aria-label="{attr(S("lang_other_aria", lang))}" title="{attr(S("lang_note", lang))}">
@@ -621,10 +671,7 @@ def build_page(lang, topics, appendix, css, js):
           {esc(S("hero_start", lang))}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
-        <a class="btn" href="#part-procgen"
-           style="border-color:rgba(110,231,183,0.42);color:var(--mint)">{esc(S("hero_procgen", lang))}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
+        {hero_part_buttons}
         <a class="btn" href="#appendix">{esc(S("hero_tasks", lang, n=appx_count))}</a>
       </div>
     </div>
@@ -758,7 +805,7 @@ def build_page(lang, topics, appendix, css, js):
     <nav class="footer-links" aria-label="{attr(S("footer_link_how", lang))}">
       <a href="#start">{esc(S("footer_link_how", lang))} <span>↑</span></a>
       <a href="#map">{esc(S("footer_link_map", lang))} <span>→</span></a>
-      <a href="#part-procgen">{esc(S("nav_procgen", lang))} <span>→</span></a>
+      {footer_part_links}
       <a href="#appendix">{esc(S("footer_link_tasks", lang))} <span>→</span></a>
       <a href="#glossary">{esc(S("footer_link_gloss", lang))} <span>→</span></a>
       <a href="README.md">{esc(S("footer_link_readme", lang))} <span>↗</span></a>
@@ -836,6 +883,7 @@ def build():
         (ROOT / "assets" / "demos-c.js").read_text(encoding="utf-8"),
         (ROOT / "assets" / "demos-procgen-a.js").read_text(encoding="utf-8"),
         (ROOT / "assets" / "demos-procgen-b.js").read_text(encoding="utf-8"),
+        (ROOT / "assets" / "demos-network.js").read_text(encoding="utf-8"),
         (ROOT / "assets" / "app.js").read_text(encoding="utf-8"),
     ])
 

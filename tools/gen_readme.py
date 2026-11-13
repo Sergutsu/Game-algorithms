@@ -21,11 +21,15 @@ from topics_6 import TOPICS_6  # noqa: E402
 from topics_7 import TOPICS_7  # noqa: E402
 from topics_procgen_a import TOPICS_PG_A  # noqa: E402
 from topics_procgen_b import TOPICS_PG_B  # noqa: E402
+from topics_net_a import TOPICS_NET_A  # noqa: E402
+from topics_net_b import TOPICS_NET_B  # noqa: E402
 from i18n import (  # noqa: E402
-    CATS, CHAPTER_ORDER, PG_GROUP_ORDER, PG_GROUPS, PG_ORDER,
+    CATS, CHAPTER_ORDER, NET_GROUP_ORDER, NET_GROUPS, NET_ORDER,
+    PG_GROUP_ORDER, PG_GROUPS, PG_ORDER,
 )
 
 PG_RANK = {tid: i for i, tid in enumerate(PG_ORDER)}
+NET_RANK = {tid: i for i, tid in enumerate(NET_ORDER)}
 
 try:
     from appendix_en import APPENDIX_EN  # noqa: E402
@@ -33,7 +37,7 @@ except ImportError:
     APPENDIX_EN = []
 
 RU = (TOPICS_1 + TOPICS_2 + TOPICS_3 + TOPICS_4 + TOPICS_5 + TOPICS_6 +
-      TOPICS_7 + TOPICS_PG_A + TOPICS_PG_B)
+      TOPICS_7 + TOPICS_PG_A + TOPICS_PG_B + TOPICS_NET_A + TOPICS_NET_B)
 EN = []
 for _i in range(1, 8):
     try:
@@ -44,7 +48,9 @@ for _i in range(1, 8):
         if _name.startswith("TOPICS_EN_"):
             EN.extend(getattr(_m, _name))
 for _mod, _attr in (("topics_en_procgen_a", "TOPICS_EN_PG_A"),
-                    ("topics_en_procgen_b", "TOPICS_EN_PG_B")):
+                    ("topics_en_procgen_b", "TOPICS_EN_PG_B"),
+                    ("topics_en_net_a", "TOPICS_EN_NET_A"),
+                    ("topics_en_net_b", "TOPICS_EN_NET_B")):
     try:
         _m = importlib.import_module(_mod)
     except ImportError:
@@ -75,7 +81,7 @@ def topic_list(topics, lang):
     lines = []
     for cat in CHAPTER_ORDER:
         items = [t for t in topics if cat_of(t) == cat]
-        if cat == "procgen":
+        if cat in ("procgen", "network"):
             continue
         items.sort(key=lambda t: t["n"])
         if not items:
@@ -113,6 +119,32 @@ def topic_list(topics, lang):
                 extra = " · 🎮 demo" if t.get("demo") else ""
                 lines.append("PG-%02d. **%s**  " % (num, t["title"]))
                 lines.append("   *(%s)*%s" % (tags, extra))
+
+    net = [t for t in topics if cat_of(t) == "network"]
+    if net:
+        lines.append("")
+        lines.append("## Часть III — сетевое взаимодействие / Part III — networked multiplayer")
+        lines.append("")
+        lines.append("> Отдельная часть исследования: полный сетевой плейбук, "
+                     "от UDP до операций крупной MMO.  ")
+        lines.append("> A separate part of the research: the full networking playbook, "
+                     "from UDP to large-MMO operations.")
+        num = 0
+        for gkey in NET_GROUP_ORDER:
+            gitems = [t for t in net if t.get("nl", "transport") == gkey]
+            if not gitems:
+                continue
+            gitems.sort(key=lambda t: NET_RANK.get(t["id"], 9999))
+            gname = NET_GROUPS[gkey][lang][0]
+            lines.append("")
+            lines.append("### %s" % gname)
+            lines.append("")
+            for t in gitems:
+                num += 1
+                tags = ", ".join(t.get("tags") or [])
+                extra = " · 🎮 demo" if t.get("demo") else ""
+                lines.append("NET-%02d. **%s**  " % (num, t["title"]))
+                lines.append("   *(%s)*%s" % (tags, extra))
     return "\n".join(lines)
 
 
@@ -144,6 +176,10 @@ def main():
     pg_d = len({t.get("demo") for t in pg_topics if t.get("demo")})
     pg_max = "PG-%02d" % len(PG_ORDER)
 
+    net_topics = [t for t in RU if cat_of(t) == "network"]
+    net_n = len(net_topics)
+    net_d = len({t.get("demo") for t in net_topics if t.get("demo")})
+
     doc = f"""# Game-algorithms
 
 <!-- Файл генерируется: python3 tools/gen_readme.py -->
@@ -158,6 +194,8 @@ def main():
 >
 > **Часть II — процедурная генерация** вынесена в отдельный атлас: {pg_n} тем,
 > {pg_d} живых моделей, четыре слоя — от шума и сэмплинга до контента и драматургии.
+> **Часть III — сетевое взаимодействие**: {net_n} темы, {net_d} живых моделей,
+> четыре слоя — транспорт, синхронизация, реальное время и масштаб.
 > Поиск, фильтры по сложности, прогресс чтения, тёмная/светлая темы и переключатель
 > языка — внутри.
 >
@@ -169,6 +207,8 @@ def main():
 > **{demos} interactive demos**; **{tasks} practical tasks** and a glossary.
 > **Part II — procedural generation** is a separate atlas: {pg_n} topics, {pg_d} live
 > models, four layers from noise and sampling up to content and drama.
+> **Part III — networked multiplayer**: {net_n} topics, {net_d} live models,
+> four layers: transport, synchronisation, real time and scale.
 > A language switch sits in the header and remembers your choice.
 
 **Онлайн / Live:** <{SITE}> — GitHub Pages, корень репозитория, ветка `main`
@@ -196,8 +236,11 @@ python3 tools/gen_readme.py   # обновить этот README
 | `research/topics_*.py` | Часть I, темы RU (1–30, 31–36 оптимизация, 37–57, 58–66 heavy/GPU) |
 | `research/topics_procgen_a.py` | Часть II, слои 01–02: шум, сэмплинг, планировка (RU) |
 | `research/topics_procgen_b.py` | Часть II, слои 03–04: миры, контент, системы (RU) |
+| `research/topics_net_a.py` | Часть III, слои 01–02: транспорт и синхронизация (RU) |
+| `research/topics_net_b.py` | Часть III, слои 03–04: реальное время и масштаб (RU) |
 | `research/topics_en_*.py` | Часть I, темы EN (те же id, английский текст) |
 | `research/topics_en_procgen_*.py` | Часть II на английском |
+| `research/topics_en_net_*.py` | Часть III на английском |
 | `research/appendix_en.py` | 45 практических задач на английском |
 | `research/codes_en.py` | Английские комментарии в примерах кода |
 | `research/i18n.py` | Разделы, подписи интерфейса, словарь, строки оболочки (RU + EN) |
@@ -209,7 +252,8 @@ python3 tools/gen_readme.py   # обновить этот README
 ## 📚 Темы — русская версия
 
 Сначала **Часть I — системы**, затем отдельная **Часть II — атлас процедурной
-генерации** (нумерация PG-01…{pg_max}).
+генерации** (нумерация PG-01…{pg_max}) и **Часть III — сетевой плейбук**
+(нумерация NET-01…NET-{net_n:02d}).
 {ru_topics}
 
 ---
