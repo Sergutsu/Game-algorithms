@@ -10,6 +10,7 @@
 
 import html
 import importlib
+import json
 import re
 import sys
 from pathlib import Path
@@ -28,14 +29,29 @@ from topics_procgen_a import TOPICS_PG_A  # noqa: E402
 from topics_procgen_b import TOPICS_PG_B  # noqa: E402
 from topics_net_a import TOPICS_NET_A  # noqa: E402
 from topics_net_b import TOPICS_NET_B  # noqa: E402
+from topics_balance_a import TOPICS_BAL_A  # noqa: E402
+from topics_balance_b import TOPICS_BAL_B, BAL_DECISIONS  # noqa: E402
+from topics_genres_a import TOPICS_GENRES_A  # noqa: E402
+from topics_genres_b import TOPICS_GENRES_B, GENRE_DECISIONS  # noqa: E402
+from styles import (  # noqa: E402
+    STYLE_GROUP_ORDER, STYLE_GROUPS, STYLE_ATOMS, STYLE_PRESETS, PROMPT_FORMATS,
+)
+from studio_i18n import STUDIO_UI  # noqa: E402
 from i18n import (  # noqa: E402
     CATS, CHAPTER_ORDER, DEMO_TITLES, GLOSSARY, LEVEL_LABEL,
     LEVELS_HINT, PARTS, PART_OF, PG_DECISIONS, PG_GROUP_ORDER, PG_GROUPS,
     PG_ORDER, STRINGS, NET_DECISIONS, NET_GROUP_ORDER, NET_GROUPS, NET_ORDER,
+    BAL_GROUP_ORDER, BAL_GROUPS, BAL_ORDER,
+    GENRE_GROUP_ORDER, GENRE_GROUPS, GENRE_ORDER,
 )
 
 RU_TOPICS = (TOPICS_1 + TOPICS_2 + TOPICS_3 + TOPICS_4 + TOPICS_5 + TOPICS_6 +
-             TOPICS_7 + TOPICS_PG_A + TOPICS_PG_B + TOPICS_NET_A + TOPICS_NET_B)
+             TOPICS_7 + TOPICS_PG_A + TOPICS_PG_B + TOPICS_NET_A + TOPICS_NET_B +
+             TOPICS_BAL_A + TOPICS_BAL_B + TOPICS_GENRES_A + TOPICS_GENRES_B)
+
+# Часть VI (студия промптов) — не темы, а данные конструктора; жанры и
+# балансовые принципы берутся из RU_TOPICS при сборке.
+PART_KEYS = ("procgen", "network", "balance", "genres")
 
 # английские версии подключаются опционально: если файла нет — остаётся русский текст
 EN_TOPICS = []
@@ -50,12 +66,31 @@ for _mod in ("topics_en_1", "topics_en_2", "topics_en_3",
 for _mod, _attr in (("topics_en_procgen_a", "TOPICS_EN_PG_A"),
                     ("topics_en_procgen_b", "TOPICS_EN_PG_B"),
                     ("topics_en_net_a", "TOPICS_EN_NET_A"),
-                    ("topics_en_net_b", "TOPICS_EN_NET_B")):
+                    ("topics_en_net_b", "TOPICS_EN_NET_B"),
+                    ("topics_en_balance_a", "TOPICS_EN_BAL_A"),
+                    ("topics_en_balance_b", "TOPICS_EN_BAL_B"),
+                    ("topics_en_genres_a", "TOPICS_EN_GENRES_A"),
+                    ("topics_en_genres_b", "TOPICS_EN_GENRES_B")):
     try:
         _m = importlib.import_module(_mod)
     except ImportError:
         continue
     EN_TOPICS.extend(getattr(_m, _attr, []))
+
+try:
+    from genres_en import GENRE_EN_EXTRA
+except ImportError:
+    GENRE_EN_EXTRA = {}
+
+try:
+    from topics_en_balance_b import BAL_DECISIONS_EN
+except ImportError:
+    BAL_DECISIONS_EN = []
+
+try:
+    from topics_en_genres_b import GENRE_DECISIONS_EN
+except ImportError:
+    GENRE_DECISIONS_EN = []
 
 try:
     from appendix_en import APPENDIX_EN
@@ -117,6 +152,10 @@ def merge_topics(ru_list, en_list):
             for field in TEXT_FIELDS:
                 if field in en and en[field]:
                     topic[field] = en[field]
+            # резервная таблица: нужна, только если у EN-темы нет формулы
+            extra = GENRE_EN_EXTRA.get(ru["id"])
+            if extra and not topic.get("formula"):
+                topic.update(extra)
             if en.get("code"):
                 topic["code"] = en["code"]
             elif ru["id"] in CODE_EN:
@@ -129,6 +168,24 @@ def merge_topics(ru_list, en_list):
 
 PG_RANK = {tid: i for i, tid in enumerate(PG_ORDER)}
 NET_RANK = {tid: i for i, tid in enumerate(NET_ORDER)}
+BAL_RANK = {tid: i for i, tid in enumerate(BAL_ORDER)}
+GENRE_RANK = {tid: i for i, tid in enumerate(GENRE_ORDER)}
+
+
+def merge_decisions(ru_list, en_list):
+    """Сливает сценарии выбора: структура из RU, тексты — по языку."""
+    merged = []
+    for i, item in enumerate(ru_list):
+        row = dict(item)
+        en = en_list[i] if i < len(en_list) else None
+        if en and en.get("en"):
+            row["en"] = en["en"]
+        merged.append(row)
+    return merged
+
+
+BAL_DECISIONS_ALL = merge_decisions(BAL_DECISIONS, BAL_DECISIONS_EN)
+GENRE_DECISIONS_ALL = merge_decisions(GENRE_DECISIONS, GENRE_DECISIONS_EN)
 
 # конфигурация частей: одна и та же разметка, разные данные
 PART_CONFIG = {
@@ -142,7 +199,20 @@ PART_CONFIG = {
         "groups": NET_GROUPS, "group_order": NET_GROUP_ORDER, "decisions": NET_DECISIONS,
         "rank": NET_RANK, "nav_short": "nav_network_short", "hero": "hero_network",
     },
+    "balance": {
+        "cat": "balance", "prefix": "BAL", "field": "bg", "numeral": "IV",
+        "groups": BAL_GROUPS, "group_order": BAL_GROUP_ORDER, "decisions": BAL_DECISIONS_ALL,
+        "rank": BAL_RANK, "nav_short": "nav_balance_short", "hero": "hero_balance",
+    },
+    "genres": {
+        "cat": "genres", "prefix": "GEN", "field": "gg", "numeral": "V",
+        "groups": GENRE_GROUPS, "group_order": GENRE_GROUP_ORDER, "decisions": GENRE_DECISIONS_ALL,
+        "rank": GENRE_RANK, "nav_short": "nav_genres_short", "hero": "hero_genres",
+    },
 }
+
+# Часть VI не состоит из тем: это атлас стилей и конструктор промптов.
+STYLE_PART = {"cat": "styles", "color": CATS["styles"]["color"], "nav_short": "nav_styles"}
 
 
 def part_order(items, cfg):
@@ -236,6 +306,102 @@ def demo_block(name, color, lang):
         </figure>'''
 
 
+METRIC_PREFIX = {"ru": "ключевая метрика:", "en": "key metric:"}
+SESSION_PREFIX = {"ru": "сессия", "en": "session"}
+
+
+def strip_metric(text):
+    """Убирает префикс «ключевая метрика:», который уже стоит в подписи."""
+    low = (text or "").strip()
+    for prefix in METRIC_PREFIX.values():
+        if low.lower().startswith(prefix):
+            return low[len(prefix):].strip()
+    return low
+
+
+def trim_prefix(text, prefixes):
+    """Снимает вводное слово, если оно уже стоит подписью рядом."""
+    low = (text or "").strip()
+    for prefix in prefixes:
+        if low.lower().startswith(prefix):
+            rest = low[len(prefix):].lstrip(" :·—")
+            return rest[:1].upper() + rest[1:] if rest else low
+    return low
+
+
+def render_genre_card(t, lang, no, part_total):
+    """Жанр — не алгоритм: та же оболочка, но карточка вместо формулы."""
+    cat = cat_of(t)
+    name, _desc = CATS[cat][lang]
+    color = CATS[cat]["color"]
+    tags = "".join(f'<span class="tag">{esc(x)}</span>' for x in t["tags"])
+    detail = "".join(f"<p>{p}</p>" for p in t["detail"])
+    loop, loop_note = t["formula"]
+    session, tempo, metric = t["complexity"]
+    steps = "".join(f"<li>{s}</li>" for s in t["steps"])
+    pitfalls = "".join(f"<li>{p}</li>" for p in t["pitfalls"])
+    games = "".join(f'<span class="game-pill">{esc(g)}</span>' for g in t["games"])
+    search = strip_tags(" ".join([
+        t["title"], t["en"], " ".join(t["tags"]), t["summary"],
+        " ".join(t["detail"]), " ".join(t["steps"]), " ".join(t["pitfalls"]),
+        " ".join(t["games"]), name, LEVEL_LABEL[t["level"]][lang],
+        session, tempo, metric, no,
+    ]))
+    en_title = t["en"] if lang == "en" else ""
+
+    return f'''
+      <article class="topic topic-genre" id="{t['id']}" data-cat="{cat}" data-level="{t['level']}"
+               data-search="{attr(search)}" style="--cat:{color}">
+        <header class="topic-head">
+          <div class="topic-num" aria-hidden="true">{no.split("-")[-1]}</div>
+          <div class="topic-titles">
+            <div class="topic-meta">
+              <span class="cat">{esc(name)}</span>
+              <span class="dot"></span>
+              <span>{esc(S("topic_part_of", lang, n=no, total=part_total, part="V"))}</span>
+              <span class="dot"></span>
+              {level_dots(t['level'], color, lang)}
+              <span>{esc(LEVEL_LABEL[t['level']][lang])}</span>
+            </div>
+            <h3>{esc(t["title"])}</h3>
+            <div class="en">{esc(en_title or t["en"])}</div>
+          </div>
+        </header>
+
+        <p class="lead">{esc(t["summary"])}</p>
+        <div class="tag-row">{tags}</div>
+
+        <div class="block-label"><b>01</b> {esc(S("block_summary", lang))}</div>
+        <div class="prose">{detail}</div>
+
+        <div class="genre-card">
+          <div class="genre-card-loop">
+            <div class="k">{esc(S("block_loop", lang))}</div>
+            <div class="v">{loop}</div>
+            <div class="n">{loop_note}</div>
+          </div>
+          <div class="genre-card-stats">
+            <div><span>{esc(S("cx_session", lang))}</span><b>{trim_prefix(session, SESSION_PREFIX.values())}</b></div>
+            <div><span>{esc(S("cx_tempo", lang))}</span><b>{tempo}</b></div>
+            <div><span>{esc(S("cx_metric", lang))}</span><b>{strip_metric(metric)}</b></div>
+          </div>
+        </div>
+
+        <div class="block-label"><b>02</b> {esc(S("block_build", lang))}</div>
+        <ol class="steps">{steps}</ol>
+
+        <div class="block-label"><b>03</b> {esc(S("block_breaks", lang))}</div>
+        <ul class="pitfalls">{pitfalls}</ul>
+
+        <div class="block-label"><b>04</b> {esc(S("block_games", lang))}</div>
+        <div class="games-row">{games}</div>
+
+        <button class="done-btn" type="button" aria-pressed="false">
+          <span class="box" aria-hidden="true"></span><span>{esc(S("done_label", lang))}</span>
+        </button>
+      </article>'''
+
+
 def render_topic(t, total, lang, shown=None, part_total=None, part_no="II"):
     cat = cat_of(t)
     name, _desc = CATS[cat][lang]
@@ -317,7 +483,7 @@ def render_topic(t, total, lang, shown=None, part_total=None, part_no="II"):
         <ul class="pitfalls">{pitfalls}</ul>
 
         <div class="block-label"><b>06</b> {esc(S("block_games", lang))}</div>
-        <div class="games-row"><span class="lbl">{esc(S("block_games", lang))}</span>{games}</div>
+        <div class="games-row">{games}</div>
         {demo}
 
         <button class="done-btn" type="button" aria-pressed="false">
@@ -391,8 +557,12 @@ def render_part(key, items, lang, total):
         <span class="count">{esc(S("part_group_topics", lang, n=len(gitems)))}</span>
       </div>
       <p class="subpart-intro">{esc(gdesc)}</p>''')
-        body.append("".join(render_topic(t, total, lang, no[t["id"]], len(items),
-                                         part_no=cfg["numeral"]) for t in gitems))
+        if cfg["cat"] == "genres":
+            body.append("".join(render_genre_card(t, lang, no[t["id"]], len(items))
+                                 for t in gitems))
+        else:
+            body.append("".join(render_topic(t, total, lang, no[t["id"]], len(items),
+                                             part_no=cfg["numeral"]) for t in gitems))
         body.append("      </div>")
 
     return f'''
@@ -431,6 +601,218 @@ def render_part(key, items, lang, total):
     </section>'''
 
 
+def style_part_data(lang, genres, balance):
+    """Данные для конструктора: уже переведённые строки, без второго языка."""
+
+    def loc(obj, field):
+        v = obj.get(field)
+        if isinstance(v, dict):
+            return v.get(lang, "")[0] if isinstance(v.get(lang), tuple) else v.get(lang, "")
+        return v or ""
+
+    def pair(obj):
+        v = obj.get(lang)
+        return v if isinstance(v, tuple) else (v, "")
+
+    return {
+        "UI": STUDIO_UI[lang],
+        "GENRES": [
+            {
+                "id": t["id"],
+                "title": t["title"],
+                "summary": t["summary"],
+                "loop": t["formula"][0],
+                "session": t["complexity"][0],
+                "pacing": t["complexity"][1],
+                "tags": t["tags"][:3],
+                "group": GENRE_GROUPS[t["gg"]][lang][0],
+            }
+            for t in genres
+        ],
+        "BALANCE": [
+            {"id": t["id"], "title": t["title"], "summary": t["summary"],
+             "tags": t["tags"][:3]}
+            for t in balance
+        ],
+        "STYLE_GROUPS": [
+            {"id": g, "num": STYLE_GROUPS[g]["num"], "color": STYLE_GROUPS[g]["color"],
+             "title": STYLE_GROUPS[g][lang][0], "desc": STYLE_GROUPS[g][lang][1]}
+            for g in STYLE_GROUP_ORDER
+        ],
+        "STYLE_ATOMS": [
+            {"id": a["id"], "group": a["g"],
+             "title": a[lang][0], "text": a[lang][1]}
+            for a in STYLE_ATOMS
+        ],
+        "PRESETS": [
+            {"id": p["id"], "title": p[lang][0], "desc": p[lang][1],
+             "genre": p["genre"], "balance": p["balance"], "atoms": p["atoms"]}
+            for p in STYLE_PRESETS
+        ],
+        "FORMATS": [
+            {"id": f["id"], "name": f[lang][0], "desc": f[lang][1]}
+            for f in PROMPT_FORMATS
+        ],
+    }
+
+
+def render_style_part(lang, genres, balance):
+    """Часть VI: атлас стилей + студия промптов. Данные уходят в JSON."""
+    ui = STUDIO_UI[lang]
+    color = CATS["styles"]["color"]
+    data = json.dumps(style_part_data(lang, genres, balance), ensure_ascii=False,
+                      separators=(",", ":"))
+    style_search = strip_tags(" ".join(
+        [ui["kicker"], ui["title"], ui["subtitle"], ui["presets_title"],
+         ui["composer_title"], ui["composer_hint"], ui["search_ph"]]
+        + [a[lang][0] + " " + a[lang][1] for a in STYLE_ATOMS]
+        + [pr[lang][0] + " " + pr[lang][1] for pr in STYLE_PRESETS]
+        + [f[lang][0] for f in PROMPT_FORMATS]
+        + [STYLE_GROUPS[g][lang][0] for g in STYLE_GROUP_ORDER]
+    ))
+
+    atlas = []
+    for gkey in STYLE_GROUP_ORDER:
+        grp = STYLE_GROUPS[gkey]
+        title, desc = grp[lang]
+        chips = "".join(f'''
+            <div class="style-atom">
+              <b>{esc(a[lang][0])}</b>
+              <span>{esc(a[lang][1])}</span>
+            </div>''' for a in STYLE_ATOMS if a["g"] == gkey)
+        atlas.append(f'''
+        <div class="pg-group">
+          <div class="pg-group-head">
+            <span class="no" style="--cat:{grp["color"]}">{grp["num"]}</span>
+            <h4>{esc(title)}</h4>
+            <span class="rule"></span>
+            <span class="count">{len([a for a in STYLE_ATOMS if a["g"] == gkey]):02d}</span>
+          </div>
+          <p class="subpart-intro">{esc(desc)}</p>
+          <div class="style-atlas-grid">{chips}</div>
+        </div>''')
+
+    preset_cards = "".join(f'''
+        <button type="button" class="studio-preset" data-preset="{pr["id"]}">
+          <b>{esc(pr[lang][0])}</b><span>{esc(pr[lang][1])}</span>
+          <em>{esc(ui["preset_apply"])}</em>
+        </button>''' for pr in STYLE_PRESETS)
+
+    def select(sid, options):
+        return '<select id="' + sid + '">' + "".join(
+            f'<option value="{o}">{esc(ui[o])}</option>' for o in options) + "</select>"
+
+    def select_formats():
+        return '<select id="studio-format">' + "".join(
+            f'<option value="{f["id"]}">{esc(f[lang][0])}</option>'
+            for f in PROMPT_FORMATS) + "</select>"
+
+    return f'''
+    <section class="chapter-block part-block style-block" id="part-styles" data-chapter="styles"
+             data-part="styles" data-cat="styles" data-search="{attr(style_search)}"
+             style="--cat:{color};--part:{color}">
+      <header class="part-hero">
+        <span class="kicker">{esc(ui["kicker"])}</span>
+        <h2>{esc(ui["title"])}</h2>
+        <div class="sub">{esc(ui["subtitle"])}</div>
+        <p class="lede">{esc(ui["lede"])}</p>
+        <div class="stats">
+          <div class="pstat"><b>{len(STYLE_ATOMS)}</b><span>{esc(S("part_stat_atoms", lang))}</span></div>
+          <div class="pstat"><b>{len(STYLE_GROUPS)}</b><span>{esc(S("part_stat_layers", lang))}</span></div>
+          <div class="pstat"><b>{len(STYLE_PRESETS)}</b><span>{esc(S("part_stat_presets", lang))}</span></div>
+          <div class="pstat"><b>{len(PROMPT_FORMATS)}</b><span>{esc(S("part_stat_formats", lang))}</span></div>
+        </div>
+        <p class="note">{esc(ui["note"])}</p>
+      </header>
+
+      <div class="part-atlas">
+        <div class="part-atlas-head">
+          <h3>{esc(ui["atlas_title"])}</h3>
+          <span>{esc(ui["atlas_hint"])}</span>
+        </div>{"".join(atlas)}
+      </div>
+
+      <div class="pg-guide">
+        <div class="pg-guide-head">
+          <h3>{esc(ui["presets_title"])}</h3>
+          <span>{esc(ui["presets_hint"])}</span>
+        </div>
+        <div class="studio-presets" id="studio-presets">{preset_cards}</div>
+      </div>
+
+      <div class="studio" id="studio-composer">
+        <div class="part-atlas-head">
+          <h3>{esc(ui["composer_title"])}</h3>
+          <span>{esc(ui["composer_hint"])}</span>
+        </div>
+
+        <div class="studio-filter-wrap">
+          <input id="studio-filter" type="search" placeholder="{attr(ui["search_ph"])}"
+                 autocomplete="off" aria-label="{attr(ui["search_ph"])}">
+        </div>
+
+        <div class="studio-step">
+          <div class="studio-step-head"><b>{esc(ui["step_genre"])}</b></div>
+          <div id="studio-genres"></div>
+        </div>
+
+        <div class="studio-step">
+          <div class="studio-step-head">
+            <b>{esc(ui["step_balance"])}</b>
+            <span id="studio-balance-count">0 / 3</span>
+          </div>
+          <div id="studio-balance" class="studio-chips"></div>
+        </div>
+
+        <div class="studio-step">
+          <div class="studio-step-head">
+            <b>{esc(ui["step_style"])}</b>
+            <span id="studio-style-count">0 / 6</span>
+          </div>
+          <div id="studio-style"></div>
+        </div>
+
+        <div class="studio-step">
+          <div class="studio-step-head"><b>{esc(ui["step_constraints"])}</b></div>
+          <div class="studio-controls">
+            <label><span>{esc(ui["team"])}</span>{select("studio-team", ["team_1", "team_5", "team_20", "team_100"])}</label>
+            <label><span>{esc(ui["platform"])}</span>{select("studio-platform", ["plat_pc", "plat_web", "plat_mobile", "plat_console"])}</label>
+            <label><span>{esc(ui["scope"])}</span>{select("studio-scope", ["scope_jam", "scope_small", "scope_full", "scope_live"])}</label>
+            <label><span>{esc(ui["monetisation"])}</span>{select("studio-moneta", ["mono_premium", "mono_f2p", "mono_none"])}</label>
+          </div>
+          <div class="studio-controls">
+            <label class="wide"><span>{esc(ui["hook"])}</span>
+              <input id="studio-hook" type="text" placeholder="{attr(ui["hook_ph"])}" autocomplete="off"></label>
+            <label class="wide"><span>{esc(ui["extra"])}</span>
+              <input id="studio-extra" type="text" placeholder="{attr(ui["extra_ph"])}" autocomplete="off"></label>
+          </div>
+        </div>
+
+        <div class="studio-step">
+          <div class="studio-step-head"><b>{esc(ui["step_output"])}</b></div>
+          <div class="studio-controls">
+            <label><span>{esc(ui["labels"]["deliverable"])}</span>{select_formats()}</label>
+          </div>
+        </div>
+
+        <div class="studio-out">
+          <div class="studio-out-head">
+            <h4>{esc(ui["prompt"])}</h4>
+            <span id="studio-meta"></span>
+            <div class="studio-actions">
+              <button type="button" id="studio-random">{esc(ui["random"])}</button>
+              <button type="button" id="studio-reset">{esc(ui["reset"])}</button>
+              <button type="button" id="studio-download">{esc(ui["download"])}</button>
+              <button type="button" id="studio-copy" class="primary">{esc(ui["copy"])}</button>
+            </div>
+          </div>
+          <pre id="studio-prompt" class="is-empty"></pre>
+        </div>
+      </div>
+    </section>
+    <script>window.GA_STUDIO = {data};</script>'''
+
+
 def build_page(lang, topics, appendix, css, js):
     chapters_all = build_chapters(topics)
     chapters = [(c, items) for c, items in chapters_all if c not in PART_OF]
@@ -446,6 +828,8 @@ def build_page(lang, topics, appendix, css, js):
         f'{esc(S(cfg["nav_short"], lang))}</a>'
         for key, items in parts for cfg in [PART_CONFIG[key]]
     )
+    part_nav += (f'<a href="#part-styles" style="color:{CATS["styles"]["color"]}">'
+                 f'{esc(S("nav_styles", lang))}</a>')
     hero_part_buttons = "".join(
         f"""<a class="btn" href="#part-{key}"
            style="border-color:color-mix(in srgb, {CATS[cfg["cat"]]["color"]} 45%, transparent);
@@ -457,7 +841,8 @@ def build_page(lang, topics, appendix, css, js):
     footer_part_links = "".join(
         f'<a href="#part-{key}">{esc(S("nav_" + key, lang))} <span>→</span></a>'
         for key, items in parts
-    )
+    ) + f'<a href="#part-styles">{esc(S("nav_styles", lang))} <span>→</span></a>'
+
 
     # sidebar table of contents
     toc = []
@@ -510,10 +895,24 @@ def build_page(lang, topics, appendix, css, js):
           </summary>{"".join(sub)}
         </details>''')
 
+    # Part VI is a single block, so it gets its own TOC entry
+    toc.append(f'''
+        <details class="toc-group toc-part" open>
+          <summary>
+            <span class="swatch" style="background:{CATS["styles"]["color"]}"></span>
+            <span>{esc(CATS["styles"][lang][0])}</span>
+            <span class="count">01</span>
+          </summary>
+          <ul class="toc-list">
+            <li><a href="#part-styles" data-cat="styles"><span class="no">VI</span><span>{esc(S("nav_styles", lang))}</span></a></li>
+            <li><a href="#studio-composer" data-cat="styles"><span class="no">→</span><span>{esc(STUDIO_UI[lang]["composer_title"])}</span></a></li>
+          </ul>
+        </details>''')
+
     cat_options = "".join(
         f'<option value="{cid}">{esc(CATS[cid][lang][0])} · {counts[cid]}</option>'
         for cid in CHAPTER_ORDER if counts.get(cid)
-    )
+    ) + f'<option value="styles">{esc(CATS["styles"][lang][0])} · 01</option>'
 
     # knowledge map: Part I chapters + wide cards for the parts
     map_cards = []
@@ -546,6 +945,17 @@ def build_page(lang, topics, appendix, css, js):
           <div class="bar" style="background:linear-gradient(90deg,{color},{color}00)"></div>
         </a>''')
 
+    map_cards.append(f'''
+        <a class="map-card part-card" href="#part-styles" data-part="styles"
+           style="--cat:{CATS["styles"]["color"]};--part:{CATS["styles"]["color"]}">
+          <div class="top">
+            <span class="name">{esc(S("nav_styles", lang))}</span>
+            <span class="n">{len(STYLE_GROUPS)} × {len(STYLE_ATOMS)}</span>
+          </div>
+          <p>{esc(STUDIO_UI[lang]["subtitle"])} · {esc(STUDIO_UI[lang]["composer_hint"])}</p>
+          <div class="bar" style="background:linear-gradient(90deg,{CATS["styles"]["color"]},{CATS["styles"]["color"]}00)"></div>
+        </a>''')
+
     chapter_html = []
     for idx, (cat, items) in enumerate(chapters, 1):
         name, _ = CATS[cat][lang]
@@ -564,6 +974,12 @@ def build_page(lang, topics, appendix, css, js):
 
     for key, items in parts:
         chapter_html.append(render_part(key, items, lang, total))
+
+    genre_topics = part_order([t for t in topics if cat_of(t) == "genres"],
+                              PART_CONFIG["genres"])
+    balance_topics = part_order([t for t in topics if cat_of(t) == "balance"],
+                                PART_CONFIG["balance"])
+    chapter_html.append(render_style_part(lang, genre_topics, balance_topics))
 
     # appendix
     appx_html = []
@@ -884,6 +1300,8 @@ def build():
         (ROOT / "assets" / "demos-procgen-a.js").read_text(encoding="utf-8"),
         (ROOT / "assets" / "demos-procgen-b.js").read_text(encoding="utf-8"),
         (ROOT / "assets" / "demos-network.js").read_text(encoding="utf-8"),
+        (ROOT / "assets" / "demos-balance.js").read_text(encoding="utf-8"),
+        (ROOT / "assets" / "studio.js").read_text(encoding="utf-8"),
         (ROOT / "assets" / "app.js").read_text(encoding="utf-8"),
     ])
 

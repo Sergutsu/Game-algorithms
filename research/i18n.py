@@ -112,6 +112,33 @@ CATS = {
         "en": ("Neural network applications",
                "Content generation and real-time upscaling."),
     },
+    "balance": {
+        "color": "#e879f9",
+        "ru": ("Баланс и прогрессия",
+               "Урон и защита, кривые опыта и роста, награды, экономика, "
+               "мета-баланс: математика, которой держится ощущение игры."),
+        "en": ("Balance and progression",
+               "Damage and defence, XP and growth curves, rewards, economy and "
+               "meta-balance: the maths that holds the feel of a game together."),
+    },
+    "genres": {
+        "color": "#facc15",
+        "ru": ("Атлас жанров",
+               "Шестнадцать семейств жанров: цикл, темп, ключевые числа и типичные "
+               "поломки — от шутеров и стратегий до симуляторов и пати-игр."),
+        "en": ("Genre atlas",
+               "Thirty-six genre dossiers: loop, tempo, key numbers and the usual "
+               "breakages — from shooters and strategies to sims and party games."),
+    },
+    "styles": {
+        "color": "#60a5fa",
+        "ru": ("Стиль и студия промптов",
+               "Шесть слоёв визуального языка, пресеты и конструктор, который "
+               "собирает из досье готовый промпт для игры."),
+        "en": ("Style and the prompt studio",
+               "Six layers of visual language, presets and a composer that turns "
+               "the dossier into a ready-to-use game prompt."),
+    },
     "heavy": {
         "color": "#4ade80",
         "ru": ("Тяжёлые нагрузки и GPU",
@@ -127,13 +154,14 @@ CATS = {
 CHAPTER_ORDER = [
     "mechanics", "ai", "gfx", "physics", "optimize",
     "math", "stats", "geometry", "shaders", "economy", "audio", "ml", "heavy",
-    "procgen", "network",
+    "procgen", "network", "balance", "genres", "styles",
 ]
 
 # --------------------------------------------------------------------------
 # отдельная часть: процедурная генерация
 # --------------------------------------------------------------------------
-PART_OF = {"procgen": "procgen", "network": "network"}
+PART_OF = {"procgen": "procgen", "network": "network",
+           "balance": "balance", "genres": "genres"}
 
 PARTS = {
     "procgen": {
@@ -209,6 +237,68 @@ PARTS = {
             "en": ("Pick the model by genre and latency budget, not by fashion. A shooter without "
                    "prediction feels rubbery, an RTS without determinism desyncs, an MMO without "
                    "interest management drowns in traffic."),
+        },
+    },
+    "balance": {
+        "kicker": {"ru": "Часть IV · математика баланса", "en": "Part IV · the maths of balance"},
+        "title": {"ru": "Баланс и прогрессия", "en": "Balance and progression"},
+        "subtitle": {
+            "ru": "Почему числа ощущаются именно так",
+            "en": "Why the numbers feel the way they do",
+        },
+        "lede": {
+            "ru": ("Двадцать четыре темы о том, как числа превращаются в ощущение: броня и "
+                   "кривая смягчения, слои формулы урона, TTK и STK, разброс и DoT; щиты, "
+                   "контроль и бюджет живучести; кривая опыта, рост статов, мягкие капы, "
+                   "бюджет очков и темп прогрессии; награды, редкость, гача, валюты, "
+                   "инфляция и гринд; степенной рост силы, сложность, боссы, PvP и "
+                   "симуляция. Каждая тема — формула, пошаговая сборка, рабочий код и "
+                   "живая модель, которую можно крутить."),
+            "en": ("Twenty-four topics about how numbers become feeling: armour and the "
+                   "mitigation curve, damage-formula layers, TTK and STK, variance and DoT; "
+                   "shields, crowd control and the survivability budget; the XP curve, stat "
+                   "growth, soft caps, point budgets and pacing; rewards, rarity, gacha, "
+                   "currencies, inflation and grind; power creep, difficulty, bosses, PvP "
+                   "and simulation. Every topic ships a formula, a step-by-step build, "
+                   "working code and a live model you can twist."),
+        },
+        "guide_title": {"ru": "Что болит → чем лечить", "en": "What hurts → what fixes it"},
+        "guide_hint": {"ru": "быстрый выбор инструмента", "en": "a quick tool chooser"},
+        "note": {
+            "ru": ("Баланс — не «подкрутить числа», а спроектировать кривые так, чтобы "
+                   "игрок чувствовал рост, а система не ломалась. Формулы здесь даны в "
+                   "игровых единицах: TTK в секундах, урон в «ударах», экономика — в "
+                   "золоте за час."),
+            "en": ("Balance is not “tweaking numbers” but designing curves so the player "
+                   "feels growth while the system does not break. Formulas here use game "
+                   "units: TTK in seconds, damage in “hits”, economy in gold per hour."),
+        },
+    },
+    "genres": {
+        "kicker": {"ru": "Часть V · атлас жанров", "en": "Part V · genre atlas"},
+        "title": {"ru": "Атлас жанров", "en": "Genre atlas"},
+        "subtitle": {"ru": "Тридцать шесть способов играть", "en": "Thirty-six ways to play"},
+        "lede": {
+            "ru": ("Каждый жанр описан по одной схеме: цикл, сессия, ритм, ключевые числа, "
+                   "типичные поломки и референсы. Это не энциклопедические статьи, а "
+                   "карточки для решений: что именно делает жанр собой, какие числа его "
+                   "держат и где он обычно ломается. Жанры сгруппированы по шести "
+                   "семействам — от экшена до социальных игр."),
+            "en": ("Every genre is described with the same structure: loop, session, tempo, "
+                   "key numbers, typical breakages and references. These are not "
+                   "encyclopedia entries but decision cards: what makes the genre itself, "
+                   "which numbers hold it together and where it usually breaks. Genres are "
+                   "grouped into six families, from action to social games."),
+        },
+        "guide_title": {"ru": "Чего хочу → в каком жанре", "en": "What I want → which genre"},
+        "guide_hint": {"ru": "быстрый выбор жанра", "en": "a quick genre chooser"},
+        "note": {
+            "ru": ("Жанр — это контракт с игроком: он обещает определённый темп, тип "
+                   "решений и цену ошибки. Смешивать жанры можно, но обещание должно "
+                   "остаться одним; иначе игрок не понимает, во что играет."),
+            "en": ("A genre is a contract with the player: it promises a tempo, a type of "
+                   "decision and a price for mistakes. Genres can be mixed, but the promise "
+                   "must stay single — otherwise the player cannot tell what they are playing."),
         },
     },
 }
@@ -391,6 +481,160 @@ NET_DECISIONS = [
      "en": ("Launch and DDoS", "anycast, limits, queues, graceful degradation")},
     {"ru": ("Отладка сети", "netem, chaos-тесты, нагрузочные боты, SLO"),
      "en": ("Network debugging", "netem, chaos tests, load bots, SLOs")},
+]
+
+# --------------------------------------------------------------------------
+# Часть IV: баланс и прогрессия — слои, порядок, сценарии выбора
+# --------------------------------------------------------------------------
+BAL_GROUP_ORDER = ["damage", "defense", "progression", "rewards", "meta"]
+
+BAL_GROUPS = {
+    "damage": {
+        "color": "#fb7185",
+        "num": "01",
+        "ru": ("Урон",
+               "Смягчение, слои формулы, TTK и STK, разброс и периодический урон: "
+               "как одно число превращается в ощущение боя."),
+        "en": ("Damage",
+               "Mitigation, formula layers, TTK and STK, variance and damage over "
+               "time: how one number becomes the feel of combat."),
+    },
+    "defense": {
+        "color": "#a5b4fc",
+        "num": "02",
+        "ru": ("Защита",
+               "Щиты и регенерация, контроль с убывающей отдачей, бюджет живучести "
+               "и капы: почему танк становится бессмертным."),
+        "en": ("Defence",
+               "Shields and regeneration, crowd control with diminishing returns, the "
+               "survivability budget and caps: why a tank becomes immortal."),
+    },
+    "progression": {
+        "color": "#6ee7b7",
+        "num": "03",
+        "ru": ("Прогрессия",
+               "Кривая опыта, рост характеристик, мягкие капы, бюджет очков и темп "
+               "прогрессии: расписание, по которому игра выдаёт силу."),
+        "en": ("Progression",
+               "The XP curve, stat growth, soft caps, point budgets and pacing: the "
+               "schedule on which a game hands out power."),
+    },
+    "rewards": {
+        "color": "#fbbf6b",
+        "num": "04",
+        "ru": ("Награды и экономика",
+               "Награда за действие, полосы редкости, гача, валюты, инфляция и гринд: "
+               "сколько стоит минута игры."),
+        "en": ("Rewards and economy",
+               "Reward per action, rarity bands, gacha, currencies, inflation and "
+               "grind: what a minute of play is worth."),
+    },
+    "meta": {
+        "color": "#c4b5fd",
+        "num": "05",
+        "ru": ("Мета-баланс",
+               "Степенной рост силы, кривая сложности, тюнинг босса, PvP и симуляция "
+               "баланса: как удержать игру живой годами."),
+        "en": ("Meta-balance",
+               "Power creep, the difficulty curve, boss tuning, PvP and balance "
+               "simulation: how to keep a game alive for years."),
+    },
+}
+
+BAL_ORDER = [
+    # damage
+    "dmg-mitigation", "dmg-formula", "dmg-ehp", "dmg-variance", "dmg-dot",
+    # defense
+    "def-shield", "def-crowd", "def-budget",
+    # progression
+    "prog-xpcurve", "prog-growth", "prog-softcap", "prog-points", "prog-pacing",
+    # rewards
+    "bal-xpreward", "bal-lootband", "bal-gacha", "bal-currency", "bal-inflation", "bal-grind",
+    # meta
+    "bal-powercreep", "bal-difficulty", "bal-boss", "bal-pvp", "bal-sim",
+]
+
+# --------------------------------------------------------------------------
+# Часть V: атлас жанров — семейства и порядок
+# --------------------------------------------------------------------------
+GENRE_GROUP_ORDER = ["action", "strategy", "rpg", "sim", "adventure", "sports"]
+
+GENRE_GROUPS = {
+    "action": {
+        "color": "#fb7185",
+        "num": "01",
+        "ru": ("Экшен",
+               "Шутеры, королевская битва, файтинги, платформеры, пулевой ад и слэшеры: "
+               "жанры, где решают реакция, чтение сцены и темп."),
+        "en": ("Action",
+               "Shooters, battle royale, fighting games, platformers, bullet hell and "
+               "slashers: genres decided by reflex, scene reading and tempo."),
+    },
+    "strategy": {
+        "color": "#7dd3fc",
+        "num": "02",
+        "ru": ("Стратегии",
+               "RTS, пошаговые 4X, MOBA, tower defense, автобаттлеры и варгеймы: "
+               "жанры решений, экономики и информации."),
+        "en": ("Strategy",
+               "RTS, turn-based 4X, MOBA, tower defense, auto battlers and wargames: "
+               "genres of decisions, economy and information."),
+    },
+    "rpg": {
+        "color": "#a78bfa",
+        "num": "03",
+        "ru": ("Ролевые игры",
+               "JRPG, CRPG, action RPG, MMO, souls-like и roguelite: рост персонажа, "
+               "билды и цена ошибки."),
+        "en": ("Role-playing",
+               "JRPG, CRPG, action RPG, MMO, souls-like and roguelite: character "
+               "growth, builds and the cost of a mistake."),
+    },
+    "sim": {
+        "color": "#bef264",
+        "num": "04",
+        "ru": ("Симуляции",
+               "Тайкуны, градостроительство, фабрики, симуляторы жизни, сурвайвал и "
+               "песочницы: системы, которые отвечают числами."),
+        "en": ("Simulations",
+               "Tycoons, city builders, factories, life sims, survival and sandboxes: "
+               "systems that answer in numbers."),
+    },
+    "adventure": {
+        "color": "#fbbf6b",
+        "num": "05",
+        "ru": ("Приключения",
+               "Метроидвании, головоломки, immersive sim, стелс, хоррор и нарративные "
+               "игры: исследование, скрытность и история."),
+        "en": ("Adventure",
+               "Metroidvanias, puzzles, immersive sims, stealth, horror and narrative "
+               "games: exploration, concealment and story."),
+    },
+    "sports": {
+        "color": "#5eead4",
+        "num": "06",
+        "ru": ("Спорт и социальные игры",
+               "Гонки, спортсимы, ритм-игры, карточные игры, idle и пати-игры: "
+               "правила, соревнование и короткие сессии."),
+        "en": ("Sports and social games",
+               "Racing, sports sims, rhythm games, card games, idle and party games: "
+               "rules, competition and short sessions."),
+    },
+}
+
+GENRE_ORDER = [
+    # action
+    "g-fps", "g-br", "g-fighting", "g-platformer", "g-shmup", "g-hackslash",
+    # strategy
+    "g-rts", "g-tbs", "g-moba", "g-towerdef", "g-autobattler", "g-wargame",
+    # rpg
+    "g-jrpg", "g-crpg", "g-arpg", "g-mmo", "g-soulslike", "g-roguelike",
+    # sim
+    "g-sim", "g-citybuilder", "g-factory", "g-lifesim", "g-survival", "g-sandbox",
+    # adventure
+    "g-metroidvania", "g-puzzle", "g-imsim", "g-stealth", "g-horror", "g-narrative",
+    # sports
+    "g-racing", "g-sports", "g-rhythm", "g-ccg", "g-idle", "g-party",
 ]
 
 # --------------------------------------------------------------------------
@@ -758,13 +1002,15 @@ STRINGS = {
         "ru": ("{n} тем — от баллистики и boids до глобального освещения, lockstep и апскейлинга. "
                "Для каждой: математическая модель, пошаговая реализация, рабочий код, честная сложность, "
                "типичные ошибки и живая интерактивная модель в браузере. "
-               "Часть II — отдельный атлас процедурной генерации: шум, пещеры, WFC, рельеф, биомы, "
-               "города, фасады, лут и музыка."),
+               "Части II и III — атласы процедурной генерации и сетевого кода; "
+               "Часть IV — математика баланса и прогрессии; Часть V — атлас из 36 жанров; "
+               "Часть VI — стиль и конструктор промптов."),
         "en": ("{n} topics — from ballistics and boids to global illumination, lockstep and upscaling. "
                "Each one: the mathematical model, a step-by-step implementation, working code, honest "
                "complexity, the usual mistakes and a live interactive model in the browser. "
-               "Part II is a separate atlas of procedural generation: noise, caves, WFC, terrain, "
-               "biomes, cities, facades, loot and music."),
+               "Parts II and III are atlases of procedural generation and netcode; Part IV is the "
+               "maths of balance and progression; Part V is an atlas of 36 genres; Part VI is style "
+               "and a prompt composer."),
     },
     "hero_start": {"ru": "Начать изучение", "en": "Start reading"},
     "hero_procgen": {"ru": "Атлас генерации", "en": "Generation atlas"},
@@ -776,9 +1022,11 @@ STRINGS = {
     "stat_deps": {"ru": "внешних зависимостей", "en": "external dependencies"},
     "meta_desc": {
         "ru": ("Алгоритмы игр: {n} тем с математикой, кодом, сложностью и интерактивными демо; "
-               "Часть II — отдельный атлас процедурной генерации: от шума до фасадов и квестов."),
+               "атласы процедурной генерации и сетевого кода, математика баланса, атлас 36 жанров "
+               "и конструктор промптов."),
         "en": ("Game algorithms: {n} topics with maths, code, complexity and interactive demos; "
-               "Part II is a separate atlas of procedural generation, from noise to facades and quests."),
+               "atlases of procedural generation and netcode, the maths of balance, an atlas of "
+               "36 genres and a prompt composer."),
     },
     "level_of": {"ru": "уровень {n} из 3", "en": "level {n} of 3"},
     "side_content": {"ru": "Содержание", "en": "Contents"},
@@ -795,8 +1043,15 @@ STRINGS = {
     "sections": {"ru": "Разделы", "en": "Sections"},
     "nav_procgen": {"ru": "Процедурная генерация", "en": "Procedural generation"},
     "nav_network": {"ru": "Сеть: MMO и netcode", "en": "Networking: MMO & netcode"},
+    "nav_balance": {"ru": "Баланс и прогрессия", "en": "Balance & progression"},
+    "nav_genres": {"ru": "Атлас жанров", "en": "Genre atlas"},
+    "nav_styles": {"ru": "Стиль и промпты", "en": "Style & prompts"},
+    "hero_balance": {"ru": "Математика баланса", "en": "Balance maths"},
+    "hero_genres": {"ru": "Атлас жанров", "en": "Genre atlas"},
     "nav_procgen_short": {"ru": "Генерация", "en": "Generation"},
     "nav_network_short": {"ru": "Сеть", "en": "Netcode"},
+    "nav_balance_short": {"ru": "Баланс", "en": "Balance"},
+    "nav_genres_short": {"ru": "Жанры", "en": "Genres"},
     "part_label": {"ru": "часть {i}", "en": "part {i}"},
     "part_topics": {"ru": "{n} тем · {g} слоя", "en": "{n} topics · {g} layers"},
     "part_atlas_title": {"ru": "Атлас алгоритмов", "en": "Algorithm atlas"},
@@ -814,8 +1069,11 @@ STRINGS = {
     "part_card_kicker": {"ru": "отдельная часть", "en": "a separate part"},
     "part_stat_topics": {"ru": "тем", "en": "topics"},
     "part_stat_demos": {"ru": "интерактивных демо", "en": "interactive demos"},
-    "part_stat_layers": {"ru": "слоя", "en": "layers"},
+    "part_stat_layers": {"ru": "слоёв", "en": "layers"},
     "part_stat_guide": {"ru": "сценариев выбора", "en": "algorithm recipes"},
+    "part_stat_atoms": {"ru": "атомов стиля", "en": "style atoms"},
+    "part_stat_presets": {"ru": "пресетов", "en": "presets"},
+    "part_stat_formats": {"ru": "форматов", "en": "formats"},
     "part_minutes": {"ru": "{n} интерактивных моделей", "en": "{n} interactive models"},
     "part_filter": {"ru": "Слой", "en": "Layer"},
     "topic_part_of": {"ru": "{n} / {total} · часть {part}", "en": "{n} / {total} · part {part}"},
@@ -861,8 +1119,8 @@ STRINGS = {
     },
     "map_title": {"ru": "Карта разделов", "en": "Map of sections"},
     "map_intro": {
-        "ru": "Пятнадцать разделов, {n} тем. Каждая карточка — группа связанных тем.",
-        "en": "Fifteen sections, {n} topics. Every card is a group of related topics.",
+        "ru": "Восемнадцать разделов, {n} тем. Каждая карточка — группа связанных тем.",
+        "en": "Eighteen sections, {n} topics. Every card is a group of related topics.",
     },
     "chapter_label": {"ru": "раздел {i} / {n}", "en": "section {i} / {n}"},
     "chapter_topics": {"ru": "{n} тем", "en": "{n} topics"},
@@ -877,6 +1135,14 @@ STRINGS = {
     "cx_time": {"ru": "Время", "en": "Time"},
     "cx_memory": {"ru": "Память", "en": "Memory"},
     "cx_practice": {"ru": "Практика", "en": "In practice"},
+    "cx_session": {"ru": "Сессия", "en": "Session"},
+    "cx_tempo": {"ru": "Темп", "en": "Tempo"},
+    "cx_metric": {"ru": "Ключевая метрика", "en": "Key metric"},
+    "block_identity": {"ru": "Карточка жанра", "en": "Genre identity card"},
+    "block_loop": {"ru": "Цикл", "en": "Loop"},
+    "block_summary": {"ru": "Что это за жанр", "en": "What this genre is"},
+    "block_breaks": {"ru": "Где жанр ломается", "en": "Where the genre breaks"},
+    "block_progress": {"ru": "Прогресс", "en": "Progress"},
     "copy": {"ru": "копировать", "en": "copy"},
     "copied": {"ru": "скопировано", "en": "copied"},
     "copy_failed": {"ru": "не вышло", "en": "failed"},

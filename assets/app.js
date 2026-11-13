@@ -117,6 +117,17 @@
     return true;
   }
 
+  /* a block without .topic (the style studio) still obeys search and category */
+  function blockVisible(block) {
+    const d = block.dataset;
+    if (state.cat !== 'all' && d.cat !== state.cat) return false;
+    if (state.level !== 'all' && d.level) return false;
+    if (!state.q) return true;
+    const own = norm(d.search);
+    if (own && own.includes(state.q)) return true;
+    return $$('.topic', block).some((t) => !t.classList.contains('is-hidden'));
+  }
+
   function render() {
     let visible = 0;
     topics.forEach((t) => {
@@ -136,7 +147,7 @@
     });
     chapterBlocks.forEach((block) => {
       const any = $$('.topic', block).some((t) => !t.classList.contains('is-hidden'));
-      block.style.display = any ? '' : 'none';
+      block.style.display = (any || blockVisible(block)) ? '' : 'none';
     });
     pgLayers.forEach((layer) => {
       const any = $$('.topic', layer).some((t) => !t.classList.contains('is-hidden'));
